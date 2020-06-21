@@ -15,8 +15,10 @@ const int WINDOW_POS_X = 400;
 const int WINDOW_POS_Y = 150;
 const double PI = 3.14159265358979323846;
 const float WINDOW_RATIO = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
+
 string msg = "ortho";
 float aspect = WINDOW_RATIO;
+bool m_bShowCoordinateArrows = true;
 
 // This is the number of frames per second to render.
 static const int FPS = 60;
@@ -41,3 +43,7 @@ void timer(int v);
 
 // Function to update the projection
 void updateProjection();
+
+void DrawObject(string inputfile);
+
+void drawCoordinateArrows(void);
