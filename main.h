@@ -3,9 +3,12 @@
 #include <iostream>
 #include <vector>
 #include <limits>
+#include <fstream>
 #include <iostream>
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 using namespace std;
 
 // Constants
@@ -47,3 +50,7 @@ void updateProjection();
 void DrawObject(string inputfile);
 
 void drawCoordinateArrows(void);
+
+bool FileExists(const std::string& abs_filename);
+
+string GetBaseDir(const std::string& filepath);
