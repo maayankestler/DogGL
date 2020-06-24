@@ -1,23 +1,10 @@
+#define TINYOBJLOADER_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
 #include "ObjectGL.h"
-#ifndef TINYOBJLOADER_IMPLEMENTATION
-	#define TINYOBJLOADER_IMPLEMENTATION
-	#include <tiny_obj_loader.h>
-#endif
-#ifndef STB_IMAGE_IMPLEMENTATION
-	#define STB_IMAGE_IMPLEMENTATION
-	#include <stb_image.h>
-#endif
 
 ObjectGL::ObjectGL(string inputfile) {
 	this->inputfile = inputfile;
-}
 
-
-void ObjectGL::draw() {
-	DrawObject(inputfile);
-}
-
-void DrawObject(string inputfile) {
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
@@ -25,7 +12,7 @@ void DrawObject(string inputfile) {
 	std::string warn;
 	std::string err;
 
-	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, inputfile.c_str());
+	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, this->inputfile.c_str());
 
 	if (!warn.empty()) {
 		std::cout << warn << std::endl;
@@ -38,6 +25,10 @@ void DrawObject(string inputfile) {
 	if (!ret) {
 		exit(1);
 	}
+
+	this->attrib = attrib;
+	this->shapes = shapes;
+	this->materials = materials;
 
 	// create texture
 	GLuint texture_id;
@@ -55,7 +46,6 @@ void DrawObject(string inputfile) {
 		}
 	}
 	unsigned char* image = stbi_load(texture_filename.c_str(), &w, &h, &comp, STBI_default);
-	// unsigned char* image = stbi_load("tex.jpg", &w, &h, &comp, STBI_default);
 	glGenTextures(1, &texture_id);
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -74,33 +64,39 @@ void DrawObject(string inputfile) {
 	else {
 		assert(0);  // TODO
 	}
+	glBindTexture(GL_TEXTURE_2D, 0);
+	stbi_image_free(image);
+	this->texture_id = texture_id;
+}
+
+
+void ObjectGL::draw() {
+	// bind Texture
+	glBindTexture(GL_TEXTURE_2D, this->texture_id);
 
 	// Loop over shapes
-	for (size_t s = 0; s < shapes.size(); s++) {
+	for (size_t s = 0; s < this->shapes.size(); s++) {
 
 		// Loop over faces(polygon)
 		size_t index_offset = 0;
-		for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
-			int fv = shapes[s].mesh.num_face_vertices[f];
+		for (size_t f = 0; f < this->shapes[s].mesh.num_face_vertices.size(); f++) {
+			int fv = this->shapes[s].mesh.num_face_vertices[f];
 
 			glBegin(GL_POLYGON);
 			// Loop over vertices in the face.
 			for (size_t v = 0; v < fv; v++) {
 				// access to vertex
-				tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
-				tinyobj::real_t vx = attrib.vertices[3 * idx.vertex_index + 0];
-				tinyobj::real_t vy = attrib.vertices[3 * idx.vertex_index + 1];
-				tinyobj::real_t vz = attrib.vertices[3 * idx.vertex_index + 2];
-				tinyobj::real_t nx = attrib.normals[3 * idx.normal_index + 0];
-				tinyobj::real_t ny = attrib.normals[3 * idx.normal_index + 1];
-				tinyobj::real_t nz = attrib.normals[3 * idx.normal_index + 2];
-				tinyobj::real_t tx = attrib.texcoords[2 * idx.texcoord_index + 0];
-				tinyobj::real_t ty = attrib.texcoords[2 * idx.texcoord_index + 1];
-				int current_material_id = shapes[s].mesh.material_ids[f];
+				tinyobj::index_t idx = this->shapes[s].mesh.indices[index_offset + v];
+				tinyobj::real_t vx = this->attrib.vertices[3 * idx.vertex_index + 0];
+				tinyobj::real_t vy = this->attrib.vertices[3 * idx.vertex_index + 1];
+				tinyobj::real_t vz = this->attrib.vertices[3 * idx.vertex_index + 2];
+				tinyobj::real_t nx = this->attrib.normals[3 * idx.normal_index + 0];
+				tinyobj::real_t ny = this->attrib.normals[3 * idx.normal_index + 1];
+				tinyobj::real_t nz = this->attrib.normals[3 * idx.normal_index + 2];
+				tinyobj::real_t tx = this->attrib.texcoords[2 * idx.texcoord_index + 0];
+				tinyobj::real_t ty = this->attrib.texcoords[2 * idx.texcoord_index + 1];
+				// int current_material_id = this->shapes[s].mesh.material_ids[f];			
 
-				// cout << tx << ty << std::endl;				
-
-				//glColor3f(1.0, 1.0, 1.0);
 				glNormal3f(nx, ny, nz);
 				glTexCoord2f(tx, ty);
 				glVertex3f(vx, vy, vz);
@@ -113,7 +109,6 @@ void DrawObject(string inputfile) {
 	}
 	// clear texture
 	glBindTexture(GL_TEXTURE_2D, 0);
-	stbi_image_free(image);
 }
 
 bool FileExists(const std::string& abs_filename) {
