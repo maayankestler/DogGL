@@ -17,7 +17,6 @@ const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 800;
 const int WINDOW_POS_X = 400;
 const int WINDOW_POS_Y = 150;
-const double PI = 3.14159265358979323846;
 const float WINDOW_RATIO = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
 
 // This is the number of frames per second to render.
@@ -26,15 +25,12 @@ static const int FPS = 60;
 // This global variable keeps track of the current orientation of the polyhedron.
 static GLfloat currentAngleOfRotation = 0.0;
 
-// Set this to true to change projection.
-static bool orthoProjection = true;
-
 class Scene
 {
-private:
-	static Scene* currentInstance;
+private:	
 	ObjectGL* dog;
 	void drawCoordinateArrows();
+	static Scene* currentInstance;
 public:
 	Scene(int argc, char** argv);
 	void display(); // Function where the scene drawing occures	

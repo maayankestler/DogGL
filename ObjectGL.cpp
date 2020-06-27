@@ -4,6 +4,8 @@
 
 ObjectGL::ObjectGL(string inputfile) {
 	this->inputfile = inputfile;
+	this->upVector = glm::vec3(0, 0, 0);
+	this->towardVector = glm::vec3(0, 0, 0);
 
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
@@ -69,8 +71,29 @@ ObjectGL::ObjectGL(string inputfile) {
 	this->texture_id = texture_id;
 }
 
+ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ) {
+	ObjectGL::ObjectGL(inputfile);
+	setPosition(PosX, PosY, PosZ);
+}
 
 void ObjectGL::draw() {
+	glPushMatrix();
+
+	// call all the tasks in the queue
+	/*while (!this->tasksQueue.empty()) {
+		function<void()> task = this->tasksQueue.front();
+		this->tasksQueue.pop();
+		task();
+	}*/
+
+	// call all the tasks in the vector
+	for (function<void()> task : this->tasks) {
+		task();
+	}
+
+	glTranslatef(PosX, PosY, PosZ);
+	glRotatef(angle, this->upVector.x, this->upVector.y, this->upVector.z);
+
 	// bind Texture
 	glBindTexture(GL_TEXTURE_2D, this->texture_id);
 
@@ -109,6 +132,7 @@ void ObjectGL::draw() {
 	}
 	// clear texture
 	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
 }
 
 bool FileExists(const std::string& abs_filename) {
@@ -120,4 +144,36 @@ string GetBaseDir(const std::string& filepath) {
 	if (filepath.find_last_of("/\\") != std::string::npos)
 		return filepath.substr(0, filepath.find_last_of("/\\"));
 	return "";
+}
+
+//Set the dog's position (center of torso position)
+void ObjectGL::setPosition(GLfloat x, GLfloat y, GLfloat z) {
+	this->PosX = x;
+	this->PosY = y;
+	this->PosZ = z;
+	// addTask([x, y, z]() { glTranslatef(x, y, z); });
+}
+
+void ObjectGL::walk(float distance) {
+	float x = this->PosX + distance * this->towardVector.x;
+	float y = this->PosY + distance * this->towardVector.y;
+	float z = this->PosZ + distance * this->towardVector.z;
+	setPosition(x, y, z);
+}
+
+void ObjectGL::addTask(function<void()> func) {
+	this->tasks.push_back(func);
+}
+
+void ObjectGL::rotate(GLfloat angle) {
+	float rad_angle = (angle / 180) * PI; // use radians
+	glm::mat4 rotationMat(1);
+	glm::vec3 cross = glm::cross(this->upVector, this->towardVector);
+	rotationMat = glm::rotate(rotationMat, rad_angle, this->upVector);
+	this->towardVector = glm::vec3(rotationMat * glm::vec4(this->towardVector, 1.0));
+	this->angle += angle;
+	//float x = this->upVector.x;
+	//float y = this->upVector.y;
+	//float z = this->upVector.z;
+	//addTask([angle, x, y, z]() { glRotatef(angle, x, y, z); });
 }

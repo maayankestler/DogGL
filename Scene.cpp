@@ -1,11 +1,11 @@
 #include "Scene.h"
 
-string msg = "ortho";
 float aspect = WINDOW_RATIO;
 bool m_bShowCoordinateArrows = true;
 
+// creating callbacks to the class functions as describe in 
+// https://stackoverflow.com/questions/3589422/using-opengl-glutdisplayfunc-within-class
 Scene* currentInstance;
-// extern "c"
 void displaycallback()
 {
 	currentInstance->display();
@@ -28,16 +28,19 @@ void keyboardcallback(unsigned char key, int x, int y)
 Scene::Scene(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-	glutInitWindowPosition(400, 150);
+	glutInitWindowPosition(WINDOW_POS_X, WINDOW_POS_Y);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 	glutCreateWindow("dog world");
 	this->dog = new ObjectGL("Retriver2.obj");
+	this->dog->towardVector = glm::vec3(-1, 0, 0);
+	this->dog->upVector = glm::vec3(0, 1, 0);
+	this->dog->addTask([]() { glScalef(0.3f, 0.3f, 0.3f); });
 
 	::currentInstance = this;
-	glutReshapeFunc(::reshapecallback);
-	glutDisplayFunc(::displaycallback);
-	glutTimerFunc(100, ::timercallback, 0);
-	glutKeyboardFunc(::keyboardcallback);
+	glutReshapeFunc(reshapecallback);
+	glutDisplayFunc(displaycallback);
+	// glutTimerFunc(100, timercallback, 0);
+	glutKeyboardFunc(keyboardcallback);
 	glutMainLoop();
 }
 
@@ -55,17 +58,13 @@ void Scene::display() {
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+	// start drawing dog
 	glTranslatef(0, 0, -20);
-	//glScalef(1, 1, 1);
 	glRotatef(15, 1.0, 1.0, 1.0);
 	glRotatef(currentAngleOfRotation, 0.0, 1.0, 0.0);
 	dog->draw();
-
-	glRasterPos3f(0.0, 6.0, 0.0);
-	for (char& c : msg) {
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, c);
-	}
-
+	// add Coordinate Arrows for debug
 	drawCoordinateArrows();
 	glFlush();
 	glutSwapBuffers();
@@ -86,23 +85,26 @@ void Scene::timer(int v) {
 
 // Handles keyboard press
 void Scene::keyboard(unsigned char key, int x, int y) {
-	orthoProjection = !orthoProjection;
-	updateProjection();
+	key = tolower(key);
+	if (key == 'w') {
+		dog->walk(1.0f);
+	}
+	else if (key == 's') {
+		dog->walk(-1.0f);
+	}
+	else if (key == 'd') {
+		dog->rotate(-5.0f);
+	}
+	else if (key == 'a') {
+		dog->rotate(5.0f);
+	}
+	glutPostRedisplay();
 }
 
 void Scene::updateProjection() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	if (orthoProjection) {
-		glOrtho(-10.0, 10.0, -10.0, 10.0, -30.0, 30.0);
-		msg = "ortho";
-		//glColor3f(0.2, 1.0, 0.2);
-	}
-	else {
-		gluPerspective(60.0, aspect, 1, 100.0);
-		msg = "Perspective";
-		//glColor3f(0.0, 0.0, 0.8);
-	}
+	gluPerspective(60.0, aspect, 1, 100.0);
 	glutPostRedisplay();
 }
 
