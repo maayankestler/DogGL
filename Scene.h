@@ -30,6 +30,8 @@ class Scene
 {
 private:	
 	ObjectGL* dog;
+	ObjectGL* statue;
+	ObjectGL* table;
 	Floor* floor;
 	void drawCoordinateArrows();
 	static Scene* currentInstance;

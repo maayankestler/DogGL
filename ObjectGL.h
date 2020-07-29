@@ -12,6 +12,7 @@
 #include <stb_image.h>
 #include <functional>
 #include <vector>
+#include <map>
 
 using namespace std;
 
@@ -27,7 +28,7 @@ class ObjectGL {
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;
-		GLuint texture_id;
+		map<string, GLuint> textures;
 	public:
 		ObjectGL(string inputfile, GLfloat PosX = 0, GLfloat PosY = 0, GLfloat PosZ = 0);
 		// ObjectGL() {};

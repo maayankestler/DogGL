@@ -32,47 +32,41 @@ ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ) {
 	this->shapes = shapes;
 	this->materials = materials;
 
-	// create texture
+	// create textures
+	this->textures[""] = 0;
 	GLuint texture_id;
-	if (materials.size() == 0) {
-		texture_id = 0;
-	}
-	else {
-		int w, h;
-		int comp;
-		string texture_filename = materials[0].diffuse_texname;
-		if (!FileExists(texture_filename)) {
-			string base_dir = GetBaseDir(inputfile);
-			// Append base dir.
-			texture_filename = base_dir + texture_filename;
-			if (!FileExists(texture_filename)) {
-				std::cerr << "Unable to find file: " << texture_filename << std::endl;
-				exit(1);
-			}
-		}
-		unsigned char* image = stbi_load(texture_filename.c_str(), &w, &h, &comp, STBI_default);
-		glGenTextures(1, &texture_id);
-		glBindTexture(GL_TEXTURE_2D, texture_id);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	int w, h;
+	int comp;
+	string texture_filename;
+	for (size_t m = 0; m < materials.size(); m++) {
+		tinyobj::material_t* mp = &materials[m];
+		texture_filename = mp->diffuse_texname;
+		if (this->textures.find(texture_filename) == this->textures.end()) {
+			unsigned char* image = stbi_load(texture_filename.c_str(), &w, &h, &comp, STBI_default);
+			glGenTextures(1, &texture_id);
+			glBindTexture(GL_TEXTURE_2D, texture_id);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		if (comp == 3) {
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
-				GL_UNSIGNED_BYTE, image);
+			if (comp == 3) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
+					GL_UNSIGNED_BYTE, image);
+			}
+			else if (comp == 4) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
+					GL_UNSIGNED_BYTE, image);
+			}
+			else {
+				assert(0);
+			}
+			glBindTexture(GL_TEXTURE_2D, 0);
+			stbi_image_free(image);
+			this->textures.insert(make_pair(mp->diffuse_texname, texture_id));
 		}
-		else if (comp == 4) {
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
-				GL_UNSIGNED_BYTE, image);
-		}
-		else {
-			assert(0);  // TODO
-		}
-		glBindTexture(GL_TEXTURE_2D, 0);
-		stbi_image_free(image);
 	}
-	this->texture_id = texture_id;
+
 	setPosition(PosX, PosY, PosZ);
 }
 
@@ -87,15 +81,17 @@ void ObjectGL::draw() {
 	glTranslatef(PosX, PosY, PosZ);
 	glRotatef(angle, this->upVector.x, this->upVector.y, this->upVector.z);
 
-	// bind Texture
-	glBindTexture(GL_TEXTURE_2D, this->texture_id);
-
 	// Loop over shapes
 	for (size_t s = 0; s < this->shapes.size(); s++) {
 
 		// Loop over faces(polygon)
 		size_t index_offset = 0;
 		for (size_t f = 0; f < this->shapes[s].mesh.num_face_vertices.size(); f++) {
+			// bind Texture
+			int current_material_id = this->shapes[s].mesh.material_ids[f];
+			string diffuse_texname = this->materials[current_material_id].diffuse_texname;
+			glBindTexture(GL_TEXTURE_2D, this->textures[diffuse_texname]);
+
 			int fv = this->shapes[s].mesh.num_face_vertices[f];
 
 			glBegin(GL_POLYGON);
@@ -109,15 +105,30 @@ void ObjectGL::draw() {
 				tinyobj::real_t nx = this->attrib.normals[3 * idx.normal_index + 0];
 				tinyobj::real_t ny = this->attrib.normals[3 * idx.normal_index + 1];
 				tinyobj::real_t nz = this->attrib.normals[3 * idx.normal_index + 2];
-				tinyobj::real_t tx = this->attrib.texcoords[2 * idx.texcoord_index + 0];
-				tinyobj::real_t ty = this->attrib.texcoords[2 * idx.texcoord_index + 1];
-				// int current_material_id = this->shapes[s].mesh.material_ids[f];			
+				if (idx.texcoord_index != -1) {
+					tinyobj::real_t tx = this->attrib.texcoords[2 * idx.texcoord_index + 0];
+					tinyobj::real_t ty = this->attrib.texcoords[2 * idx.texcoord_index + 1];
+					glTexCoord2f(tx, ty);
+				}
 
 				glNormal3f(nx, ny, nz);
-				glTexCoord2f(tx, ty);
 				glVertex3f(vx, vy, vz);
 
+				// Combine normal and diffuse to get color.
+				float diffuse_factor = 0.8; // TODO get diffuse_factor as var from imgui
+				float normal_factor = 1 - diffuse_factor;
+				float c[3] = { nx * normal_factor + materials[current_material_id].diffuse[0] * diffuse_factor,
+							   ny * normal_factor + materials[current_material_id].diffuse[1] * diffuse_factor,
+							   nz * normal_factor + materials[current_material_id].diffuse[2] * diffuse_factor };
+				float len2 = c[0] * c[0] + c[1] * c[1] + c[2] * c[2];
+				if (len2 > 0.0f) {
+					float len = sqrtf(len2);
 
+					c[0] /= len;
+					c[1] /= len;
+					c[2] /= len;
+				}
+				glColor3f(c[0] * 0.5 + 0.5, c[1] * 0.5 + 0.5, c[2] * 0.5 + 0.5);
 			}
 			index_offset += fv;
 			glEnd();

@@ -31,11 +31,16 @@ Scene::Scene(int argc, char** argv) {
 	glutInitWindowPosition(WINDOW_POS_X, WINDOW_POS_Y);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 	glutCreateWindow("dog world");
-	this->dog = new ObjectGL("Retriver2.obj", 0, 0, 0);
+	this->dog = new ObjectGL("GermanShephardLowPoly2.obj", 0, 0, 0);
+	// this->dog = new ObjectGL("GermanShephardLowPoly.obj", 0, 0, 0);
 	this->dog->towardVector = glm::vec3(-1, 0, 0);
 	this->dog->upVector = glm::vec3(0, 1, 0);
 	this->dog->addTask([]() { glScalef(0.5f, 0.5f, 0.5f); });
 	this->floor = new Floor("floor.jpg", -10, 10, -10, 10);
+	this->statue = new ObjectGL("venus_polygonal_statue.obj", -30, 0, -30);
+	this->statue->addTask([]() { glScalef(0.07f, 0.07f, 0.07f); });
+	this->table = new ObjectGL("abciuppa_table_w_m_01.obj", 2, 0, 2);
+	this->table->addTask([]() { glScalef(3.0f, 3.0f, 3.0f); });
 
 	::currentInstance = this;
 	glutReshapeFunc(reshapecallback);
@@ -60,9 +65,11 @@ void Scene::display() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	// start drawing dog
+	// start drawing
 	// glRotatef(currentAngleOfRotation, 0.0, 1.0, 0.0);
 	floor->draw();
+	statue->draw();
+	table->draw();
 	dog->draw();
 	// add Coordinate Arrows for debug
 	drawCoordinateArrows();
