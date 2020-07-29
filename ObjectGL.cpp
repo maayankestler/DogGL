@@ -2,7 +2,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "ObjectGL.h"
 
-ObjectGL::ObjectGL(string inputfile) {
+ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ) {
 	this->inputfile = inputfile;
 	this->upVector = glm::vec3(0, 0, 0);
 	this->towardVector = glm::vec3(0, 0, 0);
@@ -34,57 +34,50 @@ ObjectGL::ObjectGL(string inputfile) {
 
 	// create texture
 	GLuint texture_id;
-	int w, h;
-	int comp;
-	string texture_filename = materials[0].diffuse_texname;
-	if (!FileExists(texture_filename)) {
-		string base_dir = GetBaseDir(inputfile);
-		// Append base dir.
-		texture_filename = base_dir + texture_filename;
-		if (!FileExists(texture_filename)) {
-			std::cerr << "Unable to find file: " << texture_filename
-				<< std::endl;
-			exit(1);
-		}
-	}
-	unsigned char* image = stbi_load(texture_filename.c_str(), &w, &h, &comp, STBI_default);
-	glGenTextures(1, &texture_id);
-	glBindTexture(GL_TEXTURE_2D, texture_id);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	if (comp == 3) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
-			GL_UNSIGNED_BYTE, image);
-	}
-	else if (comp == 4) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
-			GL_UNSIGNED_BYTE, image);
+	if (materials.size() == 0) {
+		texture_id = 0;
 	}
 	else {
-		assert(0);  // TODO
-	}
-	glBindTexture(GL_TEXTURE_2D, 0);
-	stbi_image_free(image);
-	this->texture_id = texture_id;
-}
+		int w, h;
+		int comp;
+		string texture_filename = materials[0].diffuse_texname;
+		if (!FileExists(texture_filename)) {
+			string base_dir = GetBaseDir(inputfile);
+			// Append base dir.
+			texture_filename = base_dir + texture_filename;
+			if (!FileExists(texture_filename)) {
+				std::cerr << "Unable to find file: " << texture_filename << std::endl;
+				exit(1);
+			}
+		}
+		unsigned char* image = stbi_load(texture_filename.c_str(), &w, &h, &comp, STBI_default);
+		glGenTextures(1, &texture_id);
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ) {
-	ObjectGL::ObjectGL(inputfile);
+		if (comp == 3) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
+				GL_UNSIGNED_BYTE, image);
+		}
+		else if (comp == 4) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
+				GL_UNSIGNED_BYTE, image);
+		}
+		else {
+			assert(0);  // TODO
+		}
+		glBindTexture(GL_TEXTURE_2D, 0);
+		stbi_image_free(image);
+	}
+	this->texture_id = texture_id;
 	setPosition(PosX, PosY, PosZ);
 }
 
 void ObjectGL::draw() {
 	glPushMatrix();
-
-	// call all the tasks in the queue
-	/*while (!this->tasksQueue.empty()) {
-		function<void()> task = this->tasksQueue.front();
-		this->tasksQueue.pop();
-		task();
-	}*/
 
 	// call all the tasks in the vector
 	for (function<void()> task : this->tasks) {

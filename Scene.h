@@ -11,6 +11,7 @@
 using namespace std;
 
 #include "ObjectGL.h"
+#include "Floor.h"
 
 // Constants
 const int WINDOW_WIDTH = 1000;
@@ -29,6 +30,7 @@ class Scene
 {
 private:	
 	ObjectGL* dog;
+	Floor* floor;
 	void drawCoordinateArrows();
 	static Scene* currentInstance;
 public:

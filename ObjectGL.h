@@ -8,12 +8,10 @@
 #include <vector>
 #include <limits>
 #include <fstream>
-#include <iostream>
 #include <tiny_obj_loader.h>
 #include <stb_image.h>
 #include <functional>
 #include <vector>
-#include <iostream>
 
 using namespace std;
 
@@ -31,8 +29,7 @@ class ObjectGL {
 		std::vector<tinyobj::material_t> materials;
 		GLuint texture_id;
 	public:
-		ObjectGL(string inputfile);
-		ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ);
+		ObjectGL(string inputfile, GLfloat PosX = 0, GLfloat PosY = 0, GLfloat PosZ = 0);
 		// ObjectGL() {};
 		string inputfile;
 		GLfloat PosX;

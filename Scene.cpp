@@ -31,10 +31,11 @@ Scene::Scene(int argc, char** argv) {
 	glutInitWindowPosition(WINDOW_POS_X, WINDOW_POS_Y);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 	glutCreateWindow("dog world");
-	this->dog = new ObjectGL("Retriver2.obj");
+	this->dog = new ObjectGL("Retriver2.obj", 0, 0, 0);
 	this->dog->towardVector = glm::vec3(-1, 0, 0);
 	this->dog->upVector = glm::vec3(0, 1, 0);
-	this->dog->addTask([]() { glScalef(0.3f, 0.3f, 0.3f); });
+	this->dog->addTask([]() { glScalef(0.5f, 0.5f, 0.5f); });
+	this->floor = new Floor("floor.jpg", -10, 10, -10, 10);
 
 	::currentInstance = this;
 	glutReshapeFunc(reshapecallback);
@@ -60,9 +61,8 @@ void Scene::display() {
 	glLoadIdentity();
 
 	// start drawing dog
-	glTranslatef(0, 0, -20);
-	glRotatef(15, 1.0, 1.0, 1.0);
-	glRotatef(currentAngleOfRotation, 0.0, 1.0, 0.0);
+	// glRotatef(currentAngleOfRotation, 0.0, 1.0, 0.0);
+	floor->draw();
 	dog->draw();
 	// add Coordinate Arrows for debug
 	drawCoordinateArrows();
@@ -98,6 +98,14 @@ void Scene::keyboard(unsigned char key, int x, int y) {
 	else if (key == 'a') {
 		dog->rotate(5.0f);
 	}
+	//else if (key == 'o') {
+	//	dog->setPosition(dog->PosX, dog->PosY + 1, dog->PosZ);
+	//	std::cout << dog->PosX << dog->PosY << dog->PosZ << std::endl;
+	//}
+	//else if (key == 'l') {
+	//	dog->setPosition(dog->PosX, dog->PosY - 1, dog->PosZ);
+	//	std::cout << dog->PosX << dog->PosY << dog->PosZ << std::endl;
+	//}
 	glutPostRedisplay();
 }
 
@@ -105,6 +113,9 @@ void Scene::updateProjection() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(60.0, aspect, 1, 100.0);
+	gluLookAt(0, 10, 20,
+		      0, 0, 0,
+		      0, 1, 0);
 	glutPostRedisplay();
 }
 

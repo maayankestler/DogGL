@@ -155,11 +155,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Floor.h" />
     <ClInclude Include="ObjectGL.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Scene.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Floor.cpp" />
     <ClCompile Include="ObjectGL.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Scene.cpp" />
