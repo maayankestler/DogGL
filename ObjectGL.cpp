@@ -114,21 +114,39 @@ void ObjectGL::draw() {
 				glNormal3f(nx, ny, nz);
 				glVertex3f(vx, vy, vz);
 
-				// Combine normal and diffuse to get color.
-				float diffuse_factor = 0.8; // TODO get diffuse_factor as var from imgui
-				float normal_factor = 1 - diffuse_factor;
-				float c[3] = { nx * normal_factor + materials[current_material_id].diffuse[0] * diffuse_factor,
-							   ny * normal_factor + materials[current_material_id].diffuse[1] * diffuse_factor,
-							   nz * normal_factor + materials[current_material_id].diffuse[2] * diffuse_factor };
-				float len2 = c[0] * c[0] + c[1] * c[1] + c[2] * c[2];
-				if (len2 > 0.0f) {
-					float len = sqrtf(len2);
-
-					c[0] /= len;
-					c[1] /= len;
-					c[2] /= len;
+				float Kd = 0.8;
+				float Id = 0.8;
+				glm::vec3 Normal = glm::vec3(nx, ny, nz);
+				glm::vec3 lightPos = glm::vec3(0, 10, 0);
+				glm::vec3 L = lightPos - glm::vec3(vx + this->PosX, vy + this->PosY, vz + this->PosZ);
+				float angle = glm::dot(Normal, L);
+				float I;
+				if (angle > 0) {
+					I = Kd * Id * angle;
 				}
-				glColor3f(c[0] * 0.5 + 0.5, c[1] * 0.5 + 0.5, c[2] * 0.5 + 0.5);
+				else
+				{
+					I = 0;
+				}
+				glColor3f(I * materials[current_material_id].diffuse[0],
+						  I * materials[current_material_id].diffuse[1],
+						  I * materials[current_material_id].diffuse[2]);
+
+				// Combine normal and diffuse to get color.
+				//float diffuse_factor = 0.8; // TODO get diffuse_factor as var from imgui
+				//float normal_factor = 1 - diffuse_factor;
+				//float c[3] = { nx * normal_factor + materials[current_material_id].diffuse[0] * diffuse_factor,
+				//			   ny * normal_factor + materials[current_material_id].diffuse[1] * diffuse_factor,
+				//			   nz * normal_factor + materials[current_material_id].diffuse[2] * diffuse_factor };
+				//float len2 = c[0] * c[0] + c[1] * c[1] + c[2] * c[2];
+				//if (len2 > 0.0f) {
+				//	float len = sqrtf(len2);
+
+				//	c[0] /= len;
+				//	c[1] /= len;
+				//	c[2] /= len;
+				//}
+				//glColor3f(c[0] * 0.5 + 0.5, c[1] * 0.5 + 0.5, c[2] * 0.5 + 0.5);
 			}
 			index_offset += fv;
 			glEnd();
