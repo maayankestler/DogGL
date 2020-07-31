@@ -34,13 +34,12 @@ Scene::Scene(int argc, char** argv) {
 	
 	// create drawing objects
 	this->dog = new ObjectGL("GermanShephardLowPoly2.obj", 0, 0, 0);
-	// this->dog = new ObjectGL("GermanShephardLowPoly.obj", 0, 0, 0);
 	this->dog->towardVector = glm::vec3(-1, 0, 0);
-	this->dog->upVector = glm::vec3(0, 1, 0);
 	this->dog->addTask([]() { glScalef(0.5f, 0.5f, 0.5f); });
 	this->floor = new Floor("floor.jpg", -10, 10, -10, 10);
 	this->statue = new ObjectGL("venus_polygonal_statue.obj", -50, 0, -50);
 	this->statue->addTask([]() { glScalef(0.07f, 0.07f, 0.07f); });
+	this->statue->angle = 180;
 	this->table = new ObjectGL("abciuppa_table_w_m_01.obj", 2, 0, 2);
 	this->table->addTask([]() { glScalef(3.0f, 3.0f, 3.0f); });
 
@@ -69,7 +68,8 @@ void Scene::display() {
 
 	// lighting
 	glShadeModel(GL_SMOOTH);
-	glEnable(GL_BLEND);
+	//glEnable(GL_BLEND);
+	glEnable(GL_NORMALIZE);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	GLfloat position[4] = { 0.0f, 10.0f, 0.0f , 1.0f };

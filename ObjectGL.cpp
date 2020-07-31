@@ -2,10 +2,13 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "ObjectGL.h"
 
-ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ) {
+ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ,
+				   glm::vec3 upVector, glm::vec3 towardVector, GLfloat angle) {
 	this->inputfile = inputfile;
-	this->upVector = glm::vec3(0, 0, 0);
-	this->towardVector = glm::vec3(0, 0, 0);
+	setPosition(PosX, PosY, PosZ);
+	this->upVector = upVector;
+	this->towardVector = towardVector;
+	this->angle = angle;
 
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
@@ -66,8 +69,6 @@ ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ) {
 			this->textures.insert(make_pair(mp->diffuse_texname, texture_id));
 		}
 	}
-
-	setPosition(PosX, PosY, PosZ);
 }
 
 void ObjectGL::draw() {

@@ -30,7 +30,8 @@ class ObjectGL {
 		std::vector<tinyobj::material_t> materials;
 		map<string, GLuint> textures;
 	public:
-		ObjectGL(string inputfile, GLfloat PosX = 0, GLfloat PosY = 0, GLfloat PosZ = 0);
+		ObjectGL(string inputfile, GLfloat PosX = 0, GLfloat PosY = 0, GLfloat PosZ = 0, 
+			     glm::vec3 upVector = glm::vec3(0, 1, 0), glm::vec3 towardVector = glm::vec3(0, 0, 0), GLfloat angle = 0);
 		// ObjectGL() {};
 		string inputfile;
 		GLfloat PosX;
