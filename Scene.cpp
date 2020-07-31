@@ -31,13 +31,15 @@ Scene::Scene(int argc, char** argv) {
 	glutInitWindowPosition(WINDOW_POS_X, WINDOW_POS_Y);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 	glutCreateWindow("dog world");
+	
+	// create drawing objects
 	this->dog = new ObjectGL("GermanShephardLowPoly2.obj", 0, 0, 0);
 	// this->dog = new ObjectGL("GermanShephardLowPoly.obj", 0, 0, 0);
 	this->dog->towardVector = glm::vec3(-1, 0, 0);
 	this->dog->upVector = glm::vec3(0, 1, 0);
 	this->dog->addTask([]() { glScalef(0.5f, 0.5f, 0.5f); });
 	this->floor = new Floor("floor.jpg", -10, 10, -10, 10);
-	this->statue = new ObjectGL("venus_polygonal_statue.obj", -30, 0, -30);
+	this->statue = new ObjectGL("venus_polygonal_statue.obj", -50, 0, -50);
 	this->statue->addTask([]() { glScalef(0.07f, 0.07f, 0.07f); });
 	this->table = new ObjectGL("abciuppa_table_w_m_01.obj", 2, 0, 2);
 	this->table->addTask([]() { glScalef(3.0f, 3.0f, 3.0f); });
@@ -59,10 +61,33 @@ void Scene::reshape(GLint w, GLint h) {
 
 // Handles the display callback to show what we have drawn.
 void Scene::display() {
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 	glMatrixMode(GL_MODELVIEW);
+	glEnable(GL_DEPTH_TEST);
+
+	// lighting
+	glShadeModel(GL_SMOOTH);
+	glEnable(GL_BLEND);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	GLfloat position[4] = { 0.0f, 10.0f, 0.0f , 1.0f };
+	GLfloat target[3] = { 0.0f, 0.0f, 0.0f };
+	GLfloat color[3] = { 1.0f, 1.0f, 1.0f };
+	GLfloat cutoff = 30.0f;
+	GLfloat exponent = 0.0f;
+	GLfloat globalAmbientVec[4] = { 0.2f , 0.2f, 0.2f, 1.0f };
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbientVec);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, color);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, color);
+	glLightfv(GL_LIGHT1, GL_POSITION, position);
+	GLfloat direction[3] = { target[0] - position[0],
+							 target[1] - position[1],
+							 target[2] - position[2] };
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, direction);
+	//glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, cutoff);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, exponent);
 	glLoadIdentity();
 
 	// start drawing

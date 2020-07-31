@@ -87,9 +87,11 @@ void ObjectGL::draw() {
 		// Loop over faces(polygon)
 		size_t index_offset = 0;
 		for (size_t f = 0; f < this->shapes[s].mesh.num_face_vertices.size(); f++) {
-			// bind Texture
+			// get material
 			int current_material_id = this->shapes[s].mesh.material_ids[f];
-			string diffuse_texname = this->materials[current_material_id].diffuse_texname;
+			tinyobj::material_t* material = &this->materials[current_material_id];
+			// bind Texture
+			string diffuse_texname = material->diffuse_texname;
 			glBindTexture(GL_TEXTURE_2D, this->textures[diffuse_texname]);
 
 			int fv = this->shapes[s].mesh.num_face_vertices[f];
@@ -113,40 +115,12 @@ void ObjectGL::draw() {
 
 				glNormal3f(nx, ny, nz);
 				glVertex3f(vx, vy, vz);
-
-				float Kd = 0.8;
-				float Id = 0.8;
-				glm::vec3 Normal = glm::vec3(nx, ny, nz);
-				glm::vec3 lightPos = glm::vec3(0, 10, 0);
-				glm::vec3 L = lightPos - glm::vec3(vx + this->PosX, vy + this->PosY, vz + this->PosZ);
-				float angle = glm::dot(Normal, L);
-				float I;
-				if (angle > 0) {
-					I = Kd * Id * angle;
-				}
-				else
-				{
-					I = 0;
-				}
-				glColor3f(I * materials[current_material_id].diffuse[0],
-						  I * materials[current_material_id].diffuse[1],
-						  I * materials[current_material_id].diffuse[2]);
-
-				// Combine normal and diffuse to get color.
-				//float diffuse_factor = 0.8; // TODO get diffuse_factor as var from imgui
-				//float normal_factor = 1 - diffuse_factor;
-				//float c[3] = { nx * normal_factor + materials[current_material_id].diffuse[0] * diffuse_factor,
-				//			   ny * normal_factor + materials[current_material_id].diffuse[1] * diffuse_factor,
-				//			   nz * normal_factor + materials[current_material_id].diffuse[2] * diffuse_factor };
-				//float len2 = c[0] * c[0] + c[1] * c[1] + c[2] * c[2];
-				//if (len2 > 0.0f) {
-				//	float len = sqrtf(len2);
-
-				//	c[0] /= len;
-				//	c[1] /= len;
-				//	c[2] /= len;
-				//}
-				//glColor3f(c[0] * 0.5 + 0.5, c[1] * 0.5 + 0.5, c[2] * 0.5 + 0.5);
+				//glMaterialfv(GL_FRONT, GL_AMBIENT, material->ambient);
+				//glMaterialfv(GL_FRONT, GL_DIFFUSE, material->diffuse);
+				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, material->diffuse);
+				glMaterialfv(GL_FRONT, GL_SPECULAR, material->specular);
+				//glMaterialfv(GL_FRONT, GL_EMISSION, material->emission);
+				//glMaterialf(GL_FRONT, GL_SHININESS, material->shininess);
 			}
 			index_offset += fv;
 			glEnd();
@@ -194,8 +168,4 @@ void ObjectGL::rotate(GLfloat angle) {
 	rotationMat = glm::rotate(rotationMat, rad_angle, this->upVector);
 	this->towardVector = glm::vec3(rotationMat * glm::vec4(this->towardVector, 1.0));
 	this->angle += angle;
-	//float x = this->upVector.x;
-	//float y = this->upVector.y;
-	//float z = this->upVector.z;
-	//addTask([angle, x, y, z]() { glRotatef(angle, x, y, z); });
 }
