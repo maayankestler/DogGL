@@ -32,6 +32,7 @@ private:
 	ObjectGL* dog;
 	ObjectGL* statue;
 	ObjectGL* table;
+	ObjectGL* lamp;
 	Floor* floor;
 	void drawCoordinateArrows();
 	static Scene* currentInstance;

@@ -4,6 +4,7 @@
 #include <iostream>     
 #include <cassert>
 #include <stb_image.h>
+#include "ObjectGL.h"
 
 using namespace std;
 

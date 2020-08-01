@@ -22,9 +22,11 @@ string GetBaseDir(const std::string& filepath);
 
 const double PI = atan(1) * 4; // 3.14159265358979323846 https://stackoverflow.com/questions/1727881/how-to-use-the-pi-constant-in-c
 
+const string OBJECTS_DIR = "objects";
+const string TEXTURES_DIR = "textures";
+
 class ObjectGL {
 	private:
-		// queue <function<void()>> tasksQueue;
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;
@@ -32,7 +34,6 @@ class ObjectGL {
 	public:
 		ObjectGL(string inputfile, GLfloat PosX = 0, GLfloat PosY = 0, GLfloat PosZ = 0, 
 			     glm::vec3 upVector = glm::vec3(0, 1, 0), glm::vec3 towardVector = glm::vec3(0, 0, 0), GLfloat angle = 0);
-		// ObjectGL() {};
 		string inputfile;
 		GLfloat PosX;
 		GLfloat PosZ;
@@ -46,4 +47,5 @@ class ObjectGL {
 		void rotate(GLfloat angle);
 		void addTask(function<void()> func);
 		void walk(float distance);
+		static GLuint create_texture(string texture_filename);
 };

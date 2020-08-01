@@ -4,6 +4,10 @@
 
 ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ,
 				   glm::vec3 upVector, glm::vec3 towardVector, GLfloat angle) {
+	if (!FileExists(inputfile)) {
+		// Append deafult objects dir.
+		inputfile = OBJECTS_DIR + "/" + inputfile;
+	}
 	this->inputfile = inputfile;
 	setPosition(PosX, PosY, PosZ);
 	this->upVector = upVector;
@@ -17,14 +21,24 @@ ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ,
 	std::string warn;
 	std::string err;
 
-	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, this->inputfile.c_str());
+	string base_dir = GetBaseDir(inputfile);
+	if (base_dir.empty()) {
+		base_dir = ".";
+	}
+	#ifdef _WIN32
+		base_dir += "\\";
+	#else
+		base_dir += "/";
+	#endif
+
+	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, this->inputfile.c_str(), base_dir.c_str());
 
 	if (!warn.empty()) {
-		std::cout << warn << std::endl;
+		std::cout << "WARN: " << warn << std::endl;
 	}
 
 	if (!err.empty()) {
-		std::cerr << err << std::endl;
+		std::cerr << "ERROR: " << err << std::endl;
 	}
 
 	if (!ret) {
@@ -38,34 +52,16 @@ ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ,
 	// create textures
 	this->textures[""] = 0;
 	GLuint texture_id;
-	int w, h;
-	int comp;
 	string texture_filename;
 	for (size_t m = 0; m < materials.size(); m++) {
 		tinyobj::material_t* mp = &materials[m];
 		texture_filename = mp->diffuse_texname;
 		if (this->textures.find(texture_filename) == this->textures.end()) {
-			unsigned char* image = stbi_load(texture_filename.c_str(), &w, &h, &comp, STBI_default);
-			glGenTextures(1, &texture_id);
-			glBindTexture(GL_TEXTURE_2D, texture_id);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-			if (comp == 3) {
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
-					GL_UNSIGNED_BYTE, image);
+			if (FileExists(base_dir + mp->diffuse_texname)) {
+				// Append base dir.
+				texture_filename = base_dir + mp->diffuse_texname;
 			}
-			else if (comp == 4) {
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
-					GL_UNSIGNED_BYTE, image);
-			}
-			else {
-				assert(0);
-			}
-			glBindTexture(GL_TEXTURE_2D, 0);
-			stbi_image_free(image);
+			texture_id = create_texture(texture_filename);
 			this->textures.insert(make_pair(mp->diffuse_texname, texture_id));
 		}
 	}
@@ -74,13 +70,13 @@ ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ,
 void ObjectGL::draw() {
 	glPushMatrix();
 
+	glTranslatef(PosX, PosY, PosZ);
+	glRotatef(angle, this->upVector.x, this->upVector.y, this->upVector.z);
+
 	// call all the tasks in the vector
 	for (function<void()> task : this->tasks) {
 		task();
 	}
-
-	glTranslatef(PosX, PosY, PosZ);
-	glRotatef(angle, this->upVector.x, this->upVector.y, this->upVector.z);
 
 	// Loop over shapes
 	for (size_t s = 0; s < this->shapes.size(); s++) {
@@ -116,12 +112,11 @@ void ObjectGL::draw() {
 
 				glNormal3f(nx, ny, nz);
 				glVertex3f(vx, vy, vz);
-				//glMaterialfv(GL_FRONT, GL_AMBIENT, material->ambient);
-				//glMaterialfv(GL_FRONT, GL_DIFFUSE, material->diffuse);
-				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, material->diffuse);
-				glMaterialfv(GL_FRONT, GL_SPECULAR, material->specular);
-				//glMaterialfv(GL_FRONT, GL_EMISSION, material->emission);
-				//glMaterialf(GL_FRONT, GL_SHININESS, material->shininess);
+				glMaterialfv(GL_FRONT, GL_AMBIENT, material->ambient);
+				glMaterialfv(GL_FRONT, GL_DIFFUSE, material->diffuse);
+				glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, material->specular);
+				glMaterialfv(GL_FRONT, GL_EMISSION, material->emission);
+				glMaterialf(GL_FRONT, GL_SHININESS, material->shininess);
 			}
 			index_offset += fv;
 			glEnd();
@@ -132,23 +127,11 @@ void ObjectGL::draw() {
 	glPopMatrix();
 }
 
-bool FileExists(const std::string& abs_filename) {
-	ifstream f(abs_filename.c_str());
-	return f.good();
-}
-
-string GetBaseDir(const std::string& filepath) {
-	if (filepath.find_last_of("/\\") != std::string::npos)
-		return filepath.substr(0, filepath.find_last_of("/\\"));
-	return "";
-}
-
 //Set the dog's position (center of torso position)
 void ObjectGL::setPosition(GLfloat x, GLfloat y, GLfloat z) {
 	this->PosX = x;
 	this->PosY = y;
 	this->PosZ = z;
-	// addTask([x, y, z]() { glTranslatef(x, y, z); });
 }
 
 void ObjectGL::walk(float distance) {
@@ -169,4 +152,51 @@ void ObjectGL::rotate(GLfloat angle) {
 	rotationMat = glm::rotate(rotationMat, rad_angle, this->upVector);
 	this->towardVector = glm::vec3(rotationMat * glm::vec4(this->towardVector, 1.0));
 	this->angle += angle;
+}
+
+GLuint ObjectGL::create_texture(string texture_filename) {
+	if (!FileExists(texture_filename)) {
+		// Append textures dir.
+		texture_filename = TEXTURES_DIR + "/" + texture_filename;
+		if (!FileExists(texture_filename)) {
+			std::cerr << "Unable to find texture file: " << texture_filename << std::endl;
+			exit(1);
+		}
+	}
+	GLuint texture_id;
+	int w, h;
+	int comp;
+	unsigned char* image = stbi_load(texture_filename.c_str(), &w, &h, &comp, STBI_default);
+	glGenTextures(1, &texture_id);
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	if (comp == 3) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
+			GL_UNSIGNED_BYTE, image);
+	}
+	else if (comp == 4) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
+			GL_UNSIGNED_BYTE, image);
+	}
+	else {
+		assert(0);
+	}
+	glBindTexture(GL_TEXTURE_2D, 0);
+	stbi_image_free(image);
+	return texture_id;
+}
+
+bool FileExists(const std::string& abs_filename) {
+	ifstream f(abs_filename.c_str());
+	return f.good();
+}
+
+string GetBaseDir(const std::string& filepath) {
+	if (filepath.find_last_of("/\\") != std::string::npos)
+		return filepath.substr(0, filepath.find_last_of("/\\"));
+	return "";
 }
