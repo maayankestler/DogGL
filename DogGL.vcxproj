@@ -156,12 +156,26 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Floor.h" />
+    <ClInclude Include="include\imgui\imconfig.h" />
+    <ClInclude Include="include\imgui\imgui.h" />
+    <ClInclude Include="include\imgui\imgui_impl_glut.h" />
+    <ClInclude Include="include\imgui\imgui_impl_opengl2.h" />
+    <ClInclude Include="include\imgui\imgui_internal.h" />
+    <ClInclude Include="include\imgui\imstb_rectpack.h" />
+    <ClInclude Include="include\imgui\imstb_textedit.h" />
+    <ClInclude Include="include\imgui\imstb_truetype.h" />
     <ClInclude Include="ObjectGL.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Scene.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Floor.cpp" />
+    <ClCompile Include="include\imgui\imgui.cpp" />
+    <ClCompile Include="include\imgui\imgui_demo.cpp" />
+    <ClCompile Include="include\imgui\imgui_draw.cpp" />
+    <ClCompile Include="include\imgui\imgui_impl_glut.cpp" />
+    <ClCompile Include="include\imgui\imgui_impl_opengl2.cpp" />
+    <ClCompile Include="include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="ObjectGL.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Scene.cpp" />

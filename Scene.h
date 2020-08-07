@@ -7,6 +7,9 @@
 #include <limits>
 #include <fstream>
 #include <iostream>
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glut.h>
+#include <imgui/imgui_impl_opengl2.h>
 
 using namespace std;
 
@@ -26,6 +29,8 @@ static const int FPS = 60;
 // This global variable keeps track of the current orientation of the polyhedron.
 static GLfloat currentAngleOfRotation = 0.0;
 
+void display_menu();
+
 class Scene
 {
 private:	
@@ -39,7 +44,6 @@ private:
 public:
 	Scene(int argc, char** argv);
 	void display(); // Function where the scene drawing occures	
-	void timer(int v); // Function to handle the timer
 	void keyboard(unsigned char key, int x, int y); // Function for keyboard press
 	void updateProjection(); // Function to update the projection
 	void reshape(GLint w, GLint h); // Function to handle reshape of the screen
