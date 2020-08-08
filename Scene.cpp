@@ -1,13 +1,5 @@
 #include "Scene.h"
 
-float aspect = WINDOW_RATIO;
-bool m_bShowCoordinateArrows = true;
-
-// imgui state
-static bool show_demo_window = false;
-static bool show_another_window = false;
-static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
 // creating callbacks to the class functions as describe in 
 // https://stackoverflow.com/questions/3589422/using-opengl-glutdisplayfunc-within-class
 Scene* currentInstance;
@@ -28,7 +20,6 @@ void keyboardcallback(unsigned char key, int x, int y)
 // enters the main event loop.
 Scene::Scene(int argc, char** argv) {
 	glutInit(&argc, argv);
-	// glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE | GLUT_STENCIL);
 	glutInitWindowPosition(WINDOW_POS_X, WINDOW_POS_Y);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -57,9 +48,10 @@ Scene::Scene(int argc, char** argv) {
 
 	// Setup Platform/Renderer bindings
 	ImGui_ImplGLUT_Init();
-	ImGui_ImplGLUT_InstallFuncs();
+	ImGui_ImplGLUT_InstallFuncs(); // use the imgui glut funcs
 	ImGui_ImplOpenGL2_Init();
 
+	// configure glut funcs
 	::currentInstance = this;
 	glutReshapeFunc(reshapecallback);
 	glutDisplayFunc(displaycallback);
@@ -81,14 +73,21 @@ void Scene::display() {
 	ImGui_ImplGLUT_NewFrame();
 
 	// display the menu with imgui
-	display_menu();
+	if (show_menu)
+        display_menu();
 
 	// Rendering
 	ImGui::Render();
-	// ImGuiIO& io = ImGui::GetIO();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(60.0, aspect, 1, 100.0);
+	gluLookAt(camera_position[0], camera_position[1], camera_position[2],
+              camera_target[0], camera_target[1], camera_target[2],
+		      0, 1, 0);
 	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
 	glEnable(GL_TEXTURE_2D);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
@@ -99,13 +98,13 @@ void Scene::display() {
 	//glEnable(GL_BLEND);
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
 	GLfloat position[4] = { 0.0f, 10.0f, 0.0f , 1.0f };
 	GLfloat target[3] = { 0.0f, 0.0f, 0.0f };
 	GLfloat color[3] = { 1.0f, 1.0f, 1.0f };
 	GLfloat cutoff = 30.0f;
 	GLfloat exponent = 0.0f;
-	GLfloat globalAmbientVec[4] = { 0.2f , 0.2f, 0.2f, 1.0f };
+	GLfloat globalAmbientVec[4] = { ambient_intensity , ambient_intensity, ambient_intensity, 1.0f };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbientVec);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, color);
 	glLightfv(GL_LIGHT1, GL_SPECULAR, color);
@@ -127,7 +126,6 @@ void Scene::display() {
 
 	// add Coordinate Arrows for debug
 	drawCoordinateArrows();
-
 	//imgui does not handle light well
 	glDisable(GL_LIGHTING);
 	ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
@@ -140,6 +138,9 @@ void Scene::display() {
 
 // Handles keyboard press
 void Scene::keyboard(unsigned char key, int x, int y) {
+	// imgui keyboard func
+	ImGui_ImplGLUT_KeyboardFunc(key, x, y);
+
 	key = tolower(key);
 	if (key == 'w') {
 		dog->walk(1.0f);
@@ -153,30 +154,24 @@ void Scene::keyboard(unsigned char key, int x, int y) {
 	else if (key == 'a') {
 		dog->rotate(5.0f);
 	}
+	else if (key == 'm') {
+		show_menu = !show_menu;
+	}
 	glutPostRedisplay();
 }
 
 
 // Handles the window reshape event
 void Scene::reshape(GLint w, GLint h) {
+	// imgui reshape func
 	ImGui_ImplGLUT_ReshapeFunc(w, h);
+
 	glViewport(0, 0, w, h);
 	aspect = float(w / h);
-	updateProjection();
-}
-
-void Scene::updateProjection() {
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(60.0, aspect, 1, 100.0);
-	gluLookAt(0, 10, 20,
-		0, 0, 0,
-		0, 1, 0);
-	glutPostRedisplay();
 }
 
 void Scene::drawCoordinateArrows(void) {
-	if (!m_bShowCoordinateArrows) {
+	if (!show_coordinates) {
 		return;
 	}
 
@@ -215,34 +210,24 @@ void display_menu()
 
 	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
 	{
-		static float f = 0.0f;
-		static int counter = 0;
+		ImGui::Begin("Menu", &show_menu);
+			ImGui::Text("Welcome to my dog room project");  // Display some text (you can use a format strings too)
+			ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
+			ImGui::Checkbox("show coordinate crrows", &show_coordinates);  
+			ImGui::SliderFloat("ambient intensity", &ambient_intensity, 0.0f, 1.0f);
+			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
-		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+			if (ImGui::CollapsingHeader("Camera"))
+			{
+				ImGui::SliderFloat("camera position x", &camera_position[0], -20.0f, 20.0f);
+				ImGui::SliderFloat("camera position y", &camera_position[1], -5.0f, 20.0f);
+				ImGui::SliderFloat("camera position z", &camera_position[2], -30.0f, 30.0f);
+				ImGui::SliderFloat("camera target x", &camera_target[0], -20.0f, 20.0f);
+				ImGui::SliderFloat("camera target y", &camera_target[1], -15.0f, 15.0f);
+				ImGui::SliderFloat("camera target z", &camera_target[2], -20.0f, 20.0f);
+			}
 
-		ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-		ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-		ImGui::Checkbox("Another Window", &show_another_window);
-
-		ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-		ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-			counter++;
-		ImGui::SameLine();
-		ImGui::Text("counter = %d", counter);
-
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		ImGui::End();
-	}
-
-	// 3. Show another simple window.
-	if (show_another_window)
-	{
-		ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-		ImGui::Text("Hello from another window!");
-		if (ImGui::Button("Close Me"))
-			show_another_window = false;
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();
 	}
 }
