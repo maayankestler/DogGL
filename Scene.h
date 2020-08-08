@@ -31,6 +31,11 @@ static GLfloat currentAngleOfRotation = 0.0;
 
 // light
 static float ambient_intensity = 0.1f;
+static GLfloat light_position[4] = { 0.0f, 10.0f, 0.0f , 1.0f };
+static GLfloat light_target[3] = { 0.0f, 0.0f, 0.0f };
+static GLfloat light_color[3] = { 1.0f, 1.0f, 1.0f };
+static GLfloat light_cutoff = 45.0f;
+static GLfloat light_exponent = 0.0f;
 
 // others
 static bool show_coordinates = true;

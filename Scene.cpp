@@ -99,22 +99,17 @@ void Scene::display() {
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT1);
-	GLfloat position[4] = { 0.0f, 10.0f, 0.0f , 1.0f };
-	GLfloat target[3] = { 0.0f, 0.0f, 0.0f };
-	GLfloat color[3] = { 1.0f, 1.0f, 1.0f };
-	GLfloat cutoff = 30.0f;
-	GLfloat exponent = 0.0f;
 	GLfloat globalAmbientVec[4] = { ambient_intensity , ambient_intensity, ambient_intensity, 1.0f };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbientVec);
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, color);
-	glLightfv(GL_LIGHT1, GL_SPECULAR, color);
-	glLightfv(GL_LIGHT1, GL_POSITION, position);
-	GLfloat direction[3] = { target[0] - position[0],
-							 target[1] - position[1],
-							 target[2] - position[2] };
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, light_color);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, light_color);
+	glLightfv(GL_LIGHT1, GL_POSITION, light_position);
+	GLfloat direction[3] = { light_target[0] - light_position[0],
+							 light_target[1] - light_position[1],
+							 light_target[2] - light_position[2] };
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, direction);
-	//glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, cutoff);
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, exponent);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, light_cutoff);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, light_exponent);
 	glLoadIdentity();
 
 	// start drawing
@@ -213,8 +208,7 @@ void display_menu()
 		ImGui::Begin("Menu", &show_menu);
 			ImGui::Text("Welcome to my dog room project");  // Display some text (you can use a format strings too)
 			ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
-			ImGui::Checkbox("show coordinate crrows", &show_coordinates);  
-			ImGui::SliderFloat("ambient intensity", &ambient_intensity, 0.0f, 1.0f);
+			ImGui::Checkbox("show coordinate arrows", &show_coordinates);
 			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
 			if (ImGui::CollapsingHeader("Camera"))
@@ -225,6 +219,20 @@ void display_menu()
 				ImGui::SliderFloat("camera target x", &camera_target[0], -20.0f, 20.0f);
 				ImGui::SliderFloat("camera target y", &camera_target[1], -15.0f, 15.0f);
 				ImGui::SliderFloat("camera target z", &camera_target[2], -20.0f, 20.0f);
+			}
+
+			if (ImGui::CollapsingHeader("Lights"))
+			{
+				ImGui::SliderFloat("ambient intensity", &ambient_intensity, 0.0f, 1.0f);
+				ImGui::ColorEdit3("light color", (float*)(&light_color));
+				ImGui::SliderFloat("light position x", &light_position[0], -10.0f, 10.0f);
+				ImGui::SliderFloat("light position y", &light_position[1], -10.0f, 10.0f);
+				ImGui::SliderFloat("light position z", &light_position[2], -10.0f, 10.0f);
+				ImGui::SliderFloat("light target x", &light_target[0], -10.0f, 10.0f);
+				ImGui::SliderFloat("light target y", &light_target[1], -10.0f, 10.0f);
+				ImGui::SliderFloat("light target z", &light_target[2], -10.0f, 10.0f);
+				ImGui::SliderFloat("light cutoff", &light_cutoff, 0.0f, 180.0f);
+				ImGui::SliderFloat("light exponent", &light_exponent, 0.0f, 90.0f);
 			}
 
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
