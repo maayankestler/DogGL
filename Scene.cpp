@@ -1,8 +1,5 @@
 #include "Scene.h"
 
-float aspect = WINDOW_RATIO;
-bool m_bShowCoordinateArrows = true;
-
 // creating callbacks to the class functions as describe in 
 // https://stackoverflow.com/questions/3589422/using-opengl-glutdisplayfunc-within-class
 Scene* currentInstance;
@@ -14,10 +11,6 @@ void reshapecallback(GLint w, GLint h)
 {
 	currentInstance->reshape(w, h);
 }
-void timercallback(int v)
-{
-	currentInstance->timer(v);
-}
 void keyboardcallback(unsigned char key, int x, int y)
 {
 	currentInstance->keyboard(key, x, y);
@@ -27,7 +20,7 @@ void keyboardcallback(unsigned char key, int x, int y)
 // enters the main event loop.
 Scene::Scene(int argc, char** argv) {
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE | GLUT_STENCIL);
 	glutInitWindowPosition(WINDOW_POS_X, WINDOW_POS_Y);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 	glutCreateWindow("dog world");
@@ -45,27 +38,59 @@ Scene::Scene(int argc, char** argv) {
 	//this->lamp = new ObjectGL("objects/Industrial_Ceiling_Lamp_.obj", 0, 6, 0);
 	//this->lamp->addTask([]() { glScalef(2.0f, 1.0f, 2.0f); });
 
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
+	//ImGui::StyleColorsClassic();
+
+	// Setup Platform/Renderer bindings
+	ImGui_ImplGLUT_Init();
+	ImGui_ImplGLUT_InstallFuncs(); // use the imgui glut funcs
+	ImGui_ImplOpenGL2_Init();
+
+	// configure glut funcs
 	::currentInstance = this;
 	glutReshapeFunc(reshapecallback);
 	glutDisplayFunc(displaycallback);
 	//glutTimerFunc(100, timercallback, 0);
 	glutKeyboardFunc(keyboardcallback);
-	glutMainLoop();
-}
 
-// Handles the window reshape event
-void Scene::reshape(GLint w, GLint h) {
-	glViewport(0, 0, w, h);
-	aspect = float(w / h);
-	updateProjection();
+	glutMainLoop();
+
+	// Cleanup
+	ImGui_ImplOpenGL2_Shutdown();
+	ImGui_ImplGLUT_Shutdown();
+	ImGui::DestroyContext();
 }
 
 // Handles the display callback to show what we have drawn.
 void Scene::display() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// Start the Dear ImGui frame
+	ImGui_ImplOpenGL2_NewFrame();
+	ImGui_ImplGLUT_NewFrame();
+
+	// display the menu with imgui
+	if (show_menu)
+        display_menu();
+
+	// Rendering
+	ImGui::Render();
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(60.0, aspect, 1, 100.0);
+	gluLookAt(camera_position[0], camera_position[1], camera_position[2],
+              camera_target[0], camera_target[1], camera_target[2],
+		      0, 1, 0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
 	glEnable(GL_TEXTURE_2D);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-	glMatrixMode(GL_MODELVIEW);
 	glEnable(GL_DEPTH_TEST);
 
 	// lighting
@@ -73,27 +98,21 @@ void Scene::display() {
 	//glEnable(GL_BLEND);
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	GLfloat position[4] = { 0.0f, 10.0f, 0.0f , 1.0f };
-	GLfloat target[3] = { 0.0f, 0.0f, 0.0f };
-	GLfloat color[3] = { 1.0f, 1.0f, 1.0f };
-	GLfloat cutoff = 30.0f;
-	GLfloat exponent = 0.0f;
-	GLfloat globalAmbientVec[4] = { 0.2f , 0.2f, 0.2f, 1.0f };
+	glEnable(GL_LIGHT1);
+	GLfloat globalAmbientVec[4] = { ambient_intensity , ambient_intensity, ambient_intensity, 1.0f };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbientVec);
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, color);
-	glLightfv(GL_LIGHT1, GL_SPECULAR, color);
-	glLightfv(GL_LIGHT1, GL_POSITION, position);
-	GLfloat direction[3] = { target[0] - position[0],
-							 target[1] - position[1],
-							 target[2] - position[2] };
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, light_color);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, light_color);
+	glLightfv(GL_LIGHT1, GL_POSITION, light_position);
+	GLfloat direction[3] = { light_target[0] - light_position[0],
+							 light_target[1] - light_position[1],
+							 light_target[2] - light_position[2] };
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, direction);
-	//glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, cutoff);
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, exponent);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, light_cutoff);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, light_exponent);
 	glLoadIdentity();
 
 	// start drawing
-	// glRotatef(currentAngleOfRotation, 0.0, 1.0, 0.0);
 	floor->draw();
 	statue->draw();
 	table->draw();
@@ -102,25 +121,21 @@ void Scene::display() {
 
 	// add Coordinate Arrows for debug
 	drawCoordinateArrows();
+	//imgui does not handle light well
+	glDisable(GL_LIGHTING);
+	ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+	glEnable(GL_LIGHTING);
+
 	glFlush();
 	glutSwapBuffers();
-}
-
-// Handles the timer by incrementing the angle of rotation and requesting the
-// window to display again.
-// Since the timer function is only called once, it sets the same function to
-// be called again.
-void Scene::timer(int v) {
-	currentAngleOfRotation += 1.0;
-	if (currentAngleOfRotation > 360.0) {
-		currentAngleOfRotation -= 360.0;
-	}
 	glutPostRedisplay();
-	glutTimerFunc(1000 / FPS, timercallback, v);
 }
 
 // Handles keyboard press
 void Scene::keyboard(unsigned char key, int x, int y) {
+	// imgui keyboard func
+	ImGui_ImplGLUT_KeyboardFunc(key, x, y);
+
 	key = tolower(key);
 	if (key == 'w') {
 		dog->walk(1.0f);
@@ -134,21 +149,24 @@ void Scene::keyboard(unsigned char key, int x, int y) {
 	else if (key == 'a') {
 		dog->rotate(5.0f);
 	}
+	else if (key == 'm') {
+		show_menu = !show_menu;
+	}
 	glutPostRedisplay();
 }
 
-void Scene::updateProjection() {
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(60.0, aspect, 1, 100.0);
-	gluLookAt(0, 10, 20,
-		      0, 0, 0,
-		      0, 1, 0);
-	glutPostRedisplay();
+
+// Handles the window reshape event
+void Scene::reshape(GLint w, GLint h) {
+	// imgui reshape func
+	ImGui_ImplGLUT_ReshapeFunc(w, h);
+
+	glViewport(0, 0, w, h);
+	aspect = float(w / h);
 }
 
 void Scene::drawCoordinateArrows(void) {
-	if (!m_bShowCoordinateArrows) {
+	if (!show_coordinates) {
 		return;
 	}
 
@@ -177,4 +195,47 @@ void Scene::drawCoordinateArrows(void) {
 	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, 'y');
 	glRasterPos3f(0.0f, 0.0f, 1.2f);
 	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, 'z');
+}
+
+void display_menu()
+{
+	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+	if (show_demo_window)
+		ImGui::ShowDemoWindow(&show_demo_window);
+
+	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+	{
+		ImGui::Begin("Menu", &show_menu);
+			ImGui::Text("Welcome to my dog room project");  // Display some text (you can use a format strings too)
+			ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
+			ImGui::Checkbox("show coordinate arrows", &show_coordinates);
+			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+			if (ImGui::CollapsingHeader("Camera"))
+			{
+				ImGui::SliderFloat("camera position x", &camera_position[0], -20.0f, 20.0f);
+				ImGui::SliderFloat("camera position y", &camera_position[1], -5.0f, 20.0f);
+				ImGui::SliderFloat("camera position z", &camera_position[2], -30.0f, 30.0f);
+				ImGui::SliderFloat("camera target x", &camera_target[0], -20.0f, 20.0f);
+				ImGui::SliderFloat("camera target y", &camera_target[1], -15.0f, 15.0f);
+				ImGui::SliderFloat("camera target z", &camera_target[2], -20.0f, 20.0f);
+			}
+
+			if (ImGui::CollapsingHeader("Lights"))
+			{
+				ImGui::SliderFloat("ambient intensity", &ambient_intensity, 0.0f, 1.0f);
+				ImGui::ColorEdit3("light color", (float*)(&light_color));
+				ImGui::SliderFloat("light position x", &light_position[0], -10.0f, 10.0f);
+				ImGui::SliderFloat("light position y", &light_position[1], -10.0f, 10.0f);
+				ImGui::SliderFloat("light position z", &light_position[2], -10.0f, 10.0f);
+				ImGui::SliderFloat("light target x", &light_target[0], -10.0f, 10.0f);
+				ImGui::SliderFloat("light target y", &light_target[1], -10.0f, 10.0f);
+				ImGui::SliderFloat("light target z", &light_target[2], -10.0f, 10.0f);
+				ImGui::SliderFloat("light cutoff", &light_cutoff, 0.0f, 180.0f);
+				ImGui::SliderFloat("light exponent", &light_exponent, 0.0f, 90.0f);
+			}
+
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::End();
+	}
 }
