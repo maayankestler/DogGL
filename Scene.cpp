@@ -35,8 +35,15 @@ Scene::Scene(int argc, char** argv) {
 	this->statue->angle = 180;
 	this->table = new ObjectGL("abciuppa_table_w_m_01.obj", 6, 0, 6);
 	this->table->addTask([]() { glScalef(3.0f, 3.0f, 3.0f); });
-	this->lamp = new Light(GL_LIGHT0, 0, 10, 0);
-	this->lamp->towardVector = glm::vec3(0, 0, -1);
+	this->lamp = new Light(GL_LIGHT0, 0, 10, 0, "Linterna.obj");
+	this->lamp->towardVector = glm::vec3(-1, 0, 0);
+	this->lamp->lamp->addTask([]() { glScalef(0.2f, 0.2f, 0.2f); });
+	//this->lamp = new Light(GL_LIGHT0, 0, 10, 0, "3d-model.obj");
+	//this->lamp->towardVector = glm::vec3(-1, 0, 0);
+	//this->lamp->lamp->addTask([]() { glScalef(0.01f, 0.01f, 0.01f); });
+
+
+
 	//this->lamp = new ObjectGL("objects/Industrial_Ceiling_Lamp_.obj", 0, 6, 0);
 	//this->lamp->addTask([]() { glScalef(2.0f, 1.0f, 2.0f); });
 
