@@ -40,6 +40,8 @@ static bool show_menu = true;
 
 // imgui state
 static bool show_demo_window = false;
+static bool show_exit_window = false;
+static void HelpMarker(const char* desc);
 
 class Scene
 {
