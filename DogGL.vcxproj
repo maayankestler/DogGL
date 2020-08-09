@@ -164,6 +164,7 @@
     <ClInclude Include="include\imgui\imstb_rectpack.h" />
     <ClInclude Include="include\imgui\imstb_textedit.h" />
     <ClInclude Include="include\imgui\imstb_truetype.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="ObjectGL.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Scene.h" />
@@ -176,6 +177,7 @@
     <ClCompile Include="include\imgui\imgui_impl_glut.cpp" />
     <ClCompile Include="include\imgui\imgui_impl_opengl2.cpp" />
     <ClCompile Include="include\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="ObjectGL.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Scene.cpp" />

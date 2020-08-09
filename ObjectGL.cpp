@@ -112,8 +112,9 @@ void ObjectGL::draw() {
 
 				glNormal3f(nx, ny, nz);
 				glVertex3f(vx, vy, vz);
-				glMaterialfv(GL_FRONT, GL_AMBIENT, material->ambient);
-				glMaterialfv(GL_FRONT, GL_DIFFUSE, material->diffuse);
+				//glMaterialfv(GL_FRONT, GL_AMBIENT, material->ambient);
+				//glMaterialfv(GL_FRONT, GL_DIFFUSE, material->diffuse);
+				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, material->diffuse);
 				glMaterialfv(GL_FRONT, GL_SPECULAR, material->specular);
 				glMaterialfv(GL_FRONT, GL_EMISSION, material->emission);
 				glMaterialf(GL_FRONT, GL_SHININESS, material->shininess);
@@ -146,7 +147,7 @@ void ObjectGL::addTask(function<void()> func) {
 }
 
 void ObjectGL::rotate(GLfloat angle) {
-	float rad_angle = (angle / 180) * PI; // use radians
+	float rad_angle = (angle / 180) * glm::pi<float>(); // use radians
 	glm::mat4 rotationMat(1);
 	glm::vec3 cross = glm::cross(this->upVector, this->towardVector);
 	rotationMat = glm::rotate(rotationMat, rad_angle, this->upVector);

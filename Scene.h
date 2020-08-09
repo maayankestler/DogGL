@@ -15,6 +15,7 @@ using namespace std;
 
 #include "ObjectGL.h"
 #include "Floor.h"
+#include "Light.h"
 
 // window vars
 const int WINDOW_WIDTH = 1000;
@@ -30,12 +31,7 @@ static GLfloat camera_target[3] = { 0, 0, 0 };
 static GLfloat currentAngleOfRotation = 0.0;
 
 // light
-static float ambient_intensity = 0.1f;
-static GLfloat light_position[4] = { 0.0f, 10.0f, 0.0f , 1.0f };
-static GLfloat light_target[3] = { 0.0f, 0.0f, 0.0f };
-static GLfloat light_color[3] = { 1.0f, 1.0f, 1.0f };
-static GLfloat light_cutoff = 45.0f;
-static GLfloat light_exponent = 0.0f;
+static float ambient_intensity = 0.2f;
 
 // others
 static bool show_coordinates = true;
@@ -44,9 +40,6 @@ static bool show_menu = true;
 
 // imgui state
 static bool show_demo_window = false;
-static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-void display_menu();
 
 class Scene
 {
@@ -54,10 +47,11 @@ private:
 	ObjectGL* dog;
 	ObjectGL* statue;
 	ObjectGL* table;
-	ObjectGL* lamp;
+	Light* lamp;
 	Floor* floor;
 	void drawCoordinateArrows();
 	static Scene* currentInstance;
+	void display_menu();
 public:
 	Scene(int argc, char** argv);
 	void display(); // Function where the scene drawing occures	
