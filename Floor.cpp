@@ -1,11 +1,13 @@
 #include "Floor.h"
 
-Floor::Floor(string texture_filename, GLfloat xMin, GLfloat xMax, GLfloat yMin, GLfloat yMax) {
+Floor::Floor(GLfloat xMin, GLfloat xMax, GLfloat yMin, GLfloat yMax, int rows, int columns) {
 	this->xMax = xMax;
 	this->xMin = xMin;
 	this->yMax = yMax;
 	this->yMin = yMin;
-	this->texture_id = ObjectGL::create_texture(texture_filename);
+	// this->texture_id = ObjectGL::create_texture(texture_filename);
+	this->rows = rows;
+	this->columns = columns;
 }
 
 void Floor::draw()
@@ -14,19 +16,36 @@ void Floor::draw()
 	glNormal3d(0, 1, 0);
 
 	// bind Texture
-	glBindTexture(GL_TEXTURE_2D, this->texture_id);
+	//glBindTexture(GL_TEXTURE_2D, this->texture_id);
 
-	glBegin(GL_POLYGON);
-		glTexCoord2f(0.0, 0.0);
-		glVertex3f(xMin, 0, yMin);
-		glTexCoord2f(1.0, 0.0);
-		glVertex3f(xMax, 0, yMin);
-		glTexCoord2f(1.0, 1.0);
-		glVertex3f(xMax, 0, yMax);
-		glTexCoord2f(0.0, 1.0);
-		glVertex3f(xMin, 0, yMax);
+	float width = xMax - xMin;
+	float hight = yMax - yMin;
+	float row_step = hight / (float)columns;
+	float column_step = width / (float)columns;
+
+	GLfloat specular[] = { 1.0f, 1.0f, 1.0f };
+	GLfloat shininess = 128.0f;
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+	glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+
+	glBegin(GL_QUADS);
+		for (int row = 0; row < rows; row++)
+		{
+			for (int column = 0; column < columns; column++)
+			{
+				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, (row + column) % 2 == 0 ? color1 : color2);
+
+				//glTexCoord2f(0.0, 0.0);
+				glVertex3f(xMin + column * column_step, 0, yMin + row * row_step);
+				//glTexCoord2f(1.0, 0.0);
+				glVertex3f(xMin + (column + 1) * column_step, 0, yMin + row * row_step);
+				//glTexCoord2f(1.0, 1.0);
+				glVertex3f(xMin + (column + 1) * column_step, 0, yMin + (row + 1) * row_step);
+				//glTexCoord2f(0.0, 1.0);
+				glVertex3f(xMin + column * column_step, 0, yMin + (row + 1) * row_step);
+			}
+		}
 	glEnd();
 
-	glEnd();
 	glPopMatrix();
 }

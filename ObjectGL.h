@@ -20,8 +20,6 @@ bool FileExists(const std::string& abs_filename);
 
 string GetBaseDir(const std::string& filepath);
 
-const double PI = atan(1) * 4; // 3.14159265358979323846 https://stackoverflow.com/questions/1727881/how-to-use-the-pi-constant-in-c
-
 const string OBJECTS_DIR = "objects";
 const string TEXTURES_DIR = "textures";
 
