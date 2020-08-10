@@ -15,7 +15,7 @@ Light::Light(int id, GLfloat PosX, GLfloat PosY, GLfloat PosZ, string object,
 	this->exponent = exponent;
 
 	if (object.length() > 0) {
-		this->lamp = new ObjectGL(object);
+		this->object = new ObjectGL(object);
 	}
 
 	enable();
@@ -29,8 +29,8 @@ void Light::draw() {
 	glTranslatef(position[0], position[1], position[2]);
 	fixDirection();
 
-	if (this->lamp != NULL) {
-		this->lamp->draw();
+	if (this->object != NULL) {
+		this->object->draw();
 	}
 	else
 	{

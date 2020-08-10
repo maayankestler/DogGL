@@ -18,10 +18,10 @@ using namespace std;
 #include "Light.h"
 
 // window vars
-const int WINDOW_WIDTH = 1000;
-const int WINDOW_HEIGHT = 800;
-const int WINDOW_POS_X = 400;
-const int WINDOW_POS_Y = 150;
+const int WINDOW_WIDTH = 1500;
+const int WINDOW_HEIGHT = 900;
+const int WINDOW_POS_X = 100;
+const int WINDOW_POS_Y = 50;
 const float WINDOW_RATIO = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
 static float aspect = WINDOW_RATIO;
 
@@ -40,7 +40,6 @@ static bool show_menu = true;
 
 // imgui state
 static bool show_demo_window = false;
-static bool show_exit_window = false;
 static void HelpMarker(const char* desc);
 
 class Scene
@@ -49,7 +48,7 @@ private:
 	ObjectGL* dog;
 	ObjectGL* statue;
 	ObjectGL* table;
-	Light* lamp;
+	Light* flashlight;
 	Floor* floor;
 	void drawCoordinateArrows();
 	static Scene* currentInstance;
@@ -59,5 +58,6 @@ public:
 	void display(); // Function where the scene drawing occures	
 	void keyboard(unsigned char key, int x, int y); // Function for keyboard press
 	void reshape(GLint w, GLint h); // Function to handle reshape of the screen
+	void SpecialInput(int key, int x, int y); // Function to handle arrows key
 };
 

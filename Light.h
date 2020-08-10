@@ -18,7 +18,7 @@ public:
 	GLfloat exponent; // the intensity distribution of the light
 	glm::vec3 towardVector = glm::vec3(0, -1, 0);  // the direction of the light drawing
 
-	ObjectGL* lamp = NULL; // object to draw
+	ObjectGL* object = NULL; // object to draw
 
 	Light(int id, GLfloat PosX = 0, GLfloat PosY = 10, GLfloat PosZ = 0, string object = "",
 		  GLfloat cutoff = 90.0f, GLfloat exponent = 0.0f,
