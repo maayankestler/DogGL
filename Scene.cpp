@@ -30,9 +30,11 @@ Scene::Scene(int argc, char** argv) {
 	glutCreateWindow("dog world");
 	
 	// create drawing objects
-	this->dog = new ObjectGL("GermanShephardLowPoly2.obj", 0, 0, 0);
+	this->dog = new ObjectGL("GermanShephardLowPoly.obj", 0, 0, 0);
 	this->dog->towardVector = glm::vec3(-1, 0, 0);
 	this->dog->addTask([]() { glScalef(0.5f, 0.5f, 0.5f); });
+	/*this->dog->addTask([]() { glScalef(2.0f, 2.0f, 2.0f); }, "head_Plane.002");
+	this->dog->addTask([]() { glRotatef(90, 0, 1, 0); }, "head_Plane.002");*/
 	this->floor = new Floor(-10, 10, -10, 10);
 	this->statue = new ObjectGL("venus_polygonal_statue.obj", -8, 0, -8);
 	this->statue->addTask([]() { glScalef(0.07f, 0.07f, 0.07f); });
@@ -322,7 +324,7 @@ void Scene::display_menu()
 				ImGui::Text("'s' / down arrow"); ImGui::NextColumn(); ImGui::Text("move the dog backward"); ImGui::NextColumn();
 				ImGui::Text("'d' / right arrow"); ImGui::NextColumn(); ImGui::Text("turn the dog right"); ImGui::NextColumn();
 				ImGui::Text("'a' / left arrow"); ImGui::NextColumn(); ImGui::Text("turn the dog left"); ImGui::NextColumn();
-				ImGui::Text("'m'"); ImGui::NextColumn(); ImGui::Text("show menu"); ImGui::NextColumn();
+				ImGui::Text("'m'"); ImGui::NextColumn(); ImGui::Text("show or hide menu"); ImGui::NextColumn();
 				ImGui::Columns(1);
 			}
 

@@ -39,11 +39,11 @@ class ObjectGL {
 		GLfloat angle;
 		glm::vec3 towardVector;
 		glm::vec3 upVector;
-		vector<function<void()>> tasks;
+		map<string, vector<function<void()>>> shapesTasks;
 		void draw();
 		void setPosition(GLfloat x, GLfloat y, GLfloat z);
 		void rotate(GLfloat angle);
-		void addTask(function<void()> func);
+		void addTask(function<void()> func, string shape = "GLOBAL");
 		void walk(float distance);
 		static GLuint create_texture(string texture_filename);
 };
