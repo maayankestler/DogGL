@@ -150,7 +150,7 @@ void ObjectGL::setPosition(GLfloat x, GLfloat y, GLfloat z) {
 	this->PosZ = z;
 }
 
-void ObjectGL::walk(float distance) {
+void ObjectGL::walk(GLfloat distance) {
 	float x = this->PosX + distance * this->towardVector.x;
 	float y = this->PosY + distance * this->towardVector.y;
 	float z = this->PosZ + distance * this->towardVector.z;

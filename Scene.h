@@ -16,6 +16,7 @@ using namespace std;
 #include "ObjectGL.h"
 #include "Floor.h"
 #include "Light.h"
+#include "Dog.h"
 
 // window vars
 const int WINDOW_WIDTH = 1500;
@@ -34,7 +35,7 @@ static GLfloat currentAngleOfRotation = 0.0;
 static float ambient_intensity = 0.2f;
 
 // others
-static bool show_coordinates = true;
+static bool debug_mode = false;
 static bool show_menu = true;
 
 
@@ -45,7 +46,7 @@ static void HelpMarker(const char* desc);
 class Scene
 {
 private:	
-	ObjectGL* dog;
+	Dog* dog;
 	ObjectGL* statue;
 	ObjectGL* table;
 	Light* flashlight;

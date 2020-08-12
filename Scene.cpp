@@ -30,11 +30,8 @@ Scene::Scene(int argc, char** argv) {
 	glutCreateWindow("dog world");
 	
 	// create drawing objects
-	this->dog = new ObjectGL("GermanShephardLowPoly.obj", 0, 0, 0);
-	this->dog->towardVector = glm::vec3(-1, 0, 0);
+	this->dog = new Dog("GermanShephardLowPoly.obj", 0, 0, 0, glm::vec3(0, 1, 0), glm::vec3(-1, 0, 0));
 	this->dog->addTask([]() { glScalef(0.5f, 0.5f, 0.5f); });
-	/*this->dog->addTask([]() { glScalef(2.0f, 2.0f, 2.0f); }, "head_Plane.002");
-	this->dog->addTask([]() { glRotatef(90, 0, 1, 0); }, "head_Plane.002");*/
 	this->floor = new Floor(-10, 10, -10, 10);
 	this->statue = new ObjectGL("venus_polygonal_statue.obj", -8, 0, -8);
 	this->statue->addTask([]() { glScalef(0.07f, 0.07f, 0.07f); });
@@ -138,10 +135,10 @@ void Scene::keyboard(unsigned char key, int x, int y) {
 
 	key = tolower(key);
 	if (key == 'w') {
-		dog->walk(1.0f);
+		dog->walk(0.3f);
 	}
 	else if (key == 's') {
-		dog->walk(-1.0f);
+		dog->walk(-0.3f);
 	}
 	else if (key == 'd') {
 		dog->rotate(-5.0f);
@@ -151,6 +148,18 @@ void Scene::keyboard(unsigned char key, int x, int y) {
 	}
 	else if (key == 'm') {
 		show_menu = !show_menu;
+	}
+	else if (key == 'q') {
+		dog->rotateOrgan(2.0f, DOG_HEAD, false);
+	}
+	else if (key == 'e') {
+		dog->rotateOrgan(-2.0f, DOG_HEAD, false);
+	}
+	else if (key == 'g') {
+		dog->rotateOrgan(1.0f, DOG_HEAD, true);
+	}
+	else if (key == 't') {
+		dog->rotateOrgan(-1.0f, DOG_HEAD, true);
 	}
 	glutPostRedisplay();
 }
@@ -162,10 +171,10 @@ void Scene::SpecialInput(int key, int x, int y)
 	switch (key)
 	{
 	case GLUT_KEY_UP:
-		dog->walk(1.0f);
+		dog->walk(0.3f);
 		break;
 	case GLUT_KEY_DOWN:
-		dog->walk(-1.0f);
+		dog->walk(-0.3f);
 		break;
 	case GLUT_KEY_LEFT:
 		dog->rotate(5.0f);
@@ -187,7 +196,7 @@ void Scene::reshape(GLint w, GLint h) {
 }
 
 void Scene::drawCoordinateArrows(void) {
-	if (!show_coordinates) {
+	if (!debug_mode) {
 		return;
 	}
 
@@ -236,18 +245,17 @@ static void HelpMarker(const char* desc)
 
 void Scene::display_menu()
 {
-	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
 
-	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
 	{
 		ImGui::Begin("Menu", &show_menu);
-			ImGui::Text("Welcome to my dog room project");  // Display some text (you can use a format strings too)
-			ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
+			ImGui::Text("Welcome to my dog room project");
+			ImGui::Checkbox("debug mode", &debug_mode);      HelpMarker("mark to enter debug mode");
+			if (debug_mode)
+				ImGui::Checkbox("Demo imgui Window", &show_demo_window);
 
 			if (ImGui::CollapsingHeader("Room")) {
-				ImGui::Checkbox("show coordinate arrows", &show_coordinates);      HelpMarker("mark to see the coordinate arrows in the scence");
 				ImGui::ColorEdit3("floor color1", (float*)(&this->floor->color1)); HelpMarker("the floor's first color");
 				ImGui::ColorEdit3("floor color2", (float*)(&this->floor->color2)); HelpMarker("the floor's seconde color");
 			}
@@ -260,6 +268,23 @@ void Scene::display_menu()
 				ImGui::SliderFloat("camera target x", &camera_target[0], -20.0f, 20.0f);     HelpMarker("the x coordinate of the position that the camera will look at");
 				ImGui::SliderFloat("camera target y", &camera_target[1], -15.0f, 15.0f);     HelpMarker("the y coordinate of the position that the camera will look at");
 				ImGui::SliderFloat("camera target z", &camera_target[2], -20.0f, 20.0f);     HelpMarker("the z coordinate of the position that the camera will look at");
+			}
+
+			if (ImGui::CollapsingHeader("Dog")) {
+				ImGui::SliderFloat("head angle horizontal", &this->dog->organsAngles[DOG_HEAD][false], -this->dog->maxOrgansAngles[DOG_HEAD][false], this->dog->maxOrgansAngles[DOG_HEAD][false]);
+				ImGui::SliderFloat("head angle vertical", &this->dog->organsAngles[DOG_HEAD][true], -this->dog->maxOrgansAngles[DOG_HEAD][true], this->dog->maxOrgansAngles[DOG_HEAD][true]);
+				ImGui::SliderFloat("tail angle horizontal", &this->dog->organsAngles[DOG_TAIL][false], -this->dog->maxOrgansAngles[DOG_TAIL][false], this->dog->maxOrgansAngles[DOG_TAIL][false]);
+				ImGui::SliderFloat("tail angle vertical", &this->dog->organsAngles[DOG_TAIL][true], -this->dog->maxOrgansAngles[DOG_TAIL][true], this->dog->maxOrgansAngles[DOG_TAIL][true]);
+				if (debug_mode) {
+					ImGui::SliderFloat("DOG_LEFT_BACK_LEG angle horizontal", &this->dog->organsAngles[DOG_LEFT_BACK_LEG][false], -this->dog->maxOrgansAngles[DOG_LEFT_BACK_LEG][false], this->dog->maxOrgansAngles[DOG_LEFT_BACK_LEG][false]);
+					ImGui::SliderFloat("DOG_LEFT_BACK_LEG angle vertical", &this->dog->organsAngles[DOG_LEFT_BACK_LEG][true], -this->dog->maxOrgansAngles[DOG_LEFT_BACK_LEG][true], this->dog->maxOrgansAngles[DOG_LEFT_BACK_LEG][true]);
+					ImGui::SliderFloat("DOG_RIGHT_BACK_LEG angle horizontal", &this->dog->organsAngles[DOG_RIGHT_BACK_LEG][false], -this->dog->maxOrgansAngles[DOG_RIGHT_BACK_LEG][false], this->dog->maxOrgansAngles[DOG_RIGHT_BACK_LEG][false]);
+					ImGui::SliderFloat("DOG_RIGHT_BACK_LEG angle vertical", &this->dog->organsAngles[DOG_RIGHT_BACK_LEG][true], -this->dog->maxOrgansAngles[DOG_RIGHT_BACK_LEG][true], this->dog->maxOrgansAngles[DOG_RIGHT_BACK_LEG][true]);
+					ImGui::SliderFloat("DOG_LEFT_FRONT_LEG angle horizontal", &this->dog->organsAngles[DOG_LEFT_FRONT_LEG][false], -this->dog->maxOrgansAngles[DOG_LEFT_FRONT_LEG][false], this->dog->maxOrgansAngles[DOG_LEFT_FRONT_LEG][false]);
+					ImGui::SliderFloat("DOG_LEFT_FRONT_LEG angle vertical", &this->dog->organsAngles[DOG_LEFT_FRONT_LEG][true], -this->dog->maxOrgansAngles[DOG_LEFT_FRONT_LEG][true], this->dog->maxOrgansAngles[DOG_LEFT_FRONT_LEG][true]);
+					ImGui::SliderFloat("DOG_RIGHT_FRONT_LEG angle horizontal", &this->dog->organsAngles[DOG_RIGHT_FRONT_LEG][false], -this->dog->maxOrgansAngles[DOG_RIGHT_FRONT_LEG][false], this->dog->maxOrgansAngles[DOG_RIGHT_FRONT_LEG][false]);
+					ImGui::SliderFloat("DOG_RIGHT_FRONT_LEG angle vertical", &this->dog->organsAngles[DOG_RIGHT_FRONT_LEG][true], -this->dog->maxOrgansAngles[DOG_RIGHT_FRONT_LEG][true], this->dog->maxOrgansAngles[DOG_RIGHT_FRONT_LEG][true]);
+				}
 			}
 			
 			if (ImGui::CollapsingHeader("Lights"))
@@ -275,43 +300,45 @@ void Scene::display_menu()
 				ImGui::SliderFloat("light cutoff", &this->flashlight->cutoff, 0.0f, 180.0f);           HelpMarker("the angle that the light is affective");
 				ImGui::SliderFloat("light exponent", &this->flashlight->exponent, 0.0f, 30.0f);        HelpMarker("the intensity distribution of the light");
 
-				const char* items[] = { "Flashlight.obj", "Linterna.obj", "3d-model.obj" };
-				static int item_current_idx = 0;
-				if (ImGui::BeginCombo("flash light", items[item_current_idx]))
-				{
-					for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+				if (debug_mode) {
+					const char* items[] = { "Flashlight.obj", "Linterna.obj", "3d-model.obj" };
+					static int item_current_idx = 0;
+					if (ImGui::BeginCombo("flash light", items[item_current_idx]))
 					{
-						const bool is_selected = (item_current_idx == n);
-						if (ImGui::Selectable(items[n], is_selected)) {
-							item_current_idx = n;
-							switch (item_current_idx)
-							{
-							case 0:
-								this->flashlight->object = new ObjectGL("Flashlight.obj");
-								this->flashlight->towardVector = glm::vec3(0, 0, 1);
-								this->flashlight->object->addTask([]() { glScalef(0.2f, 0.2f, 0.2f); });
-								break;
-							case 1:
-								this->flashlight->object = new ObjectGL("Linterna.obj");
-								this->flashlight->towardVector = glm::vec3(-1, 0, 0);
-								this->flashlight->object->addTask([]() { glScalef(0.2f, 0.2f, 0.2f); });
-								break;
-							case 2:
-								this->flashlight->object = new ObjectGL("3d-model.obj");
-								this->flashlight->towardVector = glm::vec3(-1, 0, 0);
-								this->flashlight->object->addTask([]() { glScalef(0.01f, 0.01f, 0.01f); });
-								break;
+						for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+						{
+							const bool is_selected = (item_current_idx == n);
+							if (ImGui::Selectable(items[n], is_selected)) {
+								item_current_idx = n;
+								switch (item_current_idx)
+								{
+								case 0:
+									this->flashlight->object = new ObjectGL("Flashlight.obj");
+									this->flashlight->towardVector = glm::vec3(0, 0, 1);
+									this->flashlight->object->addTask([]() { glScalef(0.2f, 0.2f, 0.2f); });
+									break;
+								case 1:
+									this->flashlight->object = new ObjectGL("Linterna.obj");
+									this->flashlight->towardVector = glm::vec3(-1, 0, 0);
+									this->flashlight->object->addTask([]() { glScalef(0.2f, 0.2f, 0.2f); });
+									break;
+								case 2:
+									this->flashlight->object = new ObjectGL("3d-model.obj");
+									this->flashlight->towardVector = glm::vec3(-1, 0, 0);
+									this->flashlight->object->addTask([]() { glScalef(0.01f, 0.01f, 0.01f); });
+									break;
+								}
+							}
+
+							// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+							if (is_selected) {
+								ImGui::SetItemDefaultFocus();
 							}
 						}
-
-						// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-						if (is_selected) {
-							ImGui::SetItemDefaultFocus();
-						}
+						ImGui::EndCombo();
 					}
-					ImGui::EndCombo();
+					HelpMarker("chose the flashlight form");
 				}
-				HelpMarker("chose the flashlight form");
 			}
 
 			if (ImGui::CollapsingHeader("help")) {
@@ -328,7 +355,8 @@ void Scene::display_menu()
 				ImGui::Columns(1);
 			}
 
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			if (debug_mode)
+				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
 			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 0.6f, 0.6f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.7f, 0.7f));
