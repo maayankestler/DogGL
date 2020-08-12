@@ -28,10 +28,10 @@ class Dog : public ObjectGL {
 	    //    organ			         vertical max   horizontal max
 			{DOG_HEAD,            { {true, 30.0f}, {false, 60.0f} } },
 			{DOG_TAIL,            { {true, 30.0f}, {false, 60.0f} } },
-			{DOG_LEFT_BACK_LEG,   { {true, 30.0f}, {false, 30.0f} } },
-			{DOG_RIGHT_BACK_LEG,  { {true, 30.0f}, {false, 30.0f} } },
-			{DOG_LEFT_FRONT_LEG,  { {true, 30.0f}, {false, 30.0f} } },
-			{DOG_RIGHT_FRONT_LEG, { {true, 30.0f}, {false, 30.0f} } }
+			{DOG_LEFT_BACK_LEG,   { {true, 30.0f}, {false, 40.0f} } },
+			{DOG_RIGHT_BACK_LEG,  { {true, 30.0f}, {false, 40.0f} } },
+			{DOG_LEFT_FRONT_LEG,  { {true, 30.0f}, {false, 40.0f} } },
+			{DOG_RIGHT_FRONT_LEG, { {true, 30.0f}, {false, 40.0f} } }
 		};
 		map<int, map<bool, float>> organsAngles = {
 		//    organ			        vertical max   horizontal max
@@ -44,7 +44,13 @@ class Dog : public ObjectGL {
 		};
 		void rotateOrgan(GLfloat angle, int organ, bool vertical);
 		void walk(GLfloat distance);
+		void rotate(GLfloat angle);
 	private:
 		glm::vec3 sideVector;
+		bool right_legs_forward = true;
+		bool legs_turn_right = true;
+		GLfloat legs_angle_per_step = 3.0f;
+		GLfloat legs_angle_per_rotate = 8.0f;
 		void handleRotation(int organ);
+		void moveLegs(GLfloat angle, bool vertical = true);
 };

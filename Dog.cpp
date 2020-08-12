@@ -53,9 +53,48 @@ void Dog::handleRotation(int organ) {
 }
 
 void Dog::walk(GLfloat distance) {
+	moveLegs(legs_angle_per_step, true);
 	ObjectGL::walk(distance);
-	rotateOrgan(1.0f, DOG_RIGHT_BACK_LEG, true);
-	rotateOrgan(1.0f, DOG_RIGHT_FRONT_LEG, true);
-	rotateOrgan(1.0f, DOG_LEFT_BACK_LEG, true);
-	rotateOrgan(1.0f, DOG_LEFT_FRONT_LEG, true);
+}
+
+void Dog::rotate(GLfloat angle) {
+	moveLegs(legs_angle_per_rotate, false);
+	ObjectGL::rotate(angle);
+}
+
+void Dog::moveLegs(GLfloat angle, bool vertical) {
+	if (vertical) {
+		if (abs(organsAngles[DOG_RIGHT_FRONT_LEG][vertical]) + angle > maxOrgansAngles[DOG_RIGHT_FRONT_LEG][vertical]) {
+			right_legs_forward = !right_legs_forward;
+		}
+		if (right_legs_forward) {
+			rotateOrgan(-angle, DOG_RIGHT_BACK_LEG, vertical);
+			rotateOrgan(-angle, DOG_RIGHT_FRONT_LEG, vertical);
+			rotateOrgan(angle, DOG_LEFT_BACK_LEG, vertical);
+			rotateOrgan(angle, DOG_LEFT_FRONT_LEG, vertical);
+		}
+		else {
+			rotateOrgan(angle, DOG_RIGHT_BACK_LEG, vertical);
+			rotateOrgan(angle, DOG_RIGHT_FRONT_LEG, vertical);
+			rotateOrgan(-angle, DOG_LEFT_BACK_LEG, vertical);
+			rotateOrgan(-angle, DOG_LEFT_FRONT_LEG, vertical);
+		}
+	}
+	else {
+		if (abs(organsAngles[DOG_RIGHT_FRONT_LEG][false]) + angle > maxOrgansAngles[DOG_RIGHT_FRONT_LEG][false]) {
+			legs_turn_right = !legs_turn_right;
+		}
+		if (legs_turn_right) {
+			rotateOrgan(angle, DOG_RIGHT_BACK_LEG, false);
+			rotateOrgan(angle, DOG_RIGHT_FRONT_LEG, false);
+			rotateOrgan(angle, DOG_LEFT_BACK_LEG, false);
+			rotateOrgan(angle, DOG_LEFT_FRONT_LEG, false);
+		}
+		else {
+			rotateOrgan(-angle, DOG_RIGHT_BACK_LEG, false);
+			rotateOrgan(-angle, DOG_RIGHT_FRONT_LEG, false);
+			rotateOrgan(-angle, DOG_LEFT_BACK_LEG, false);
+			rotateOrgan(-angle, DOG_LEFT_FRONT_LEG, false);
+		}
+	}
 }

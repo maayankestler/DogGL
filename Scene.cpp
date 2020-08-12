@@ -141,10 +141,10 @@ void Scene::keyboard(unsigned char key, int x, int y) {
 		dog->walk(-0.3f);
 	}
 	else if (key == 'd') {
-		dog->rotate(-5.0f);
+		dog->rotate(-2.0f);
 	}
 	else if (key == 'a') {
-		dog->rotate(5.0f);
+		dog->rotate(2.0f);
 	}
 	else if (key == 'm') {
 		show_menu = !show_menu;
@@ -351,6 +351,10 @@ void Scene::display_menu()
 				ImGui::Text("'s' / down arrow"); ImGui::NextColumn(); ImGui::Text("move the dog backward"); ImGui::NextColumn();
 				ImGui::Text("'d' / right arrow"); ImGui::NextColumn(); ImGui::Text("turn the dog right"); ImGui::NextColumn();
 				ImGui::Text("'a' / left arrow"); ImGui::NextColumn(); ImGui::Text("turn the dog left"); ImGui::NextColumn();
+				ImGui::Text("'q'"); ImGui::NextColumn(); ImGui::Text("turn the dog head left"); ImGui::NextColumn();
+				ImGui::Text("'e'"); ImGui::NextColumn(); ImGui::Text("turn the dog head right"); ImGui::NextColumn();
+				ImGui::Text("'g'"); ImGui::NextColumn(); ImGui::Text("turn the dog head down"); ImGui::NextColumn();
+				ImGui::Text("'t'"); ImGui::NextColumn(); ImGui::Text("turn the dog head up"); ImGui::NextColumn();
 				ImGui::Text("'m'"); ImGui::NextColumn(); ImGui::Text("show or hide menu"); ImGui::NextColumn();
 				ImGui::Columns(1);
 			}
