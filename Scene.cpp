@@ -15,9 +15,21 @@ void keyboardcallback(unsigned char key, int x, int y)
 {
 	currentInstance->keyboard(key, x, y);
 }
+void keyboardupcallback(unsigned char key, int x, int y)
+{
+	currentInstance->keyboardUp(key, x, y);
+}
 void Specialcallback(int key, int x, int y)
 {
 	currentInstance->SpecialInput(key, x, y);
+}
+void Specialupcallback(int key, int x, int y)
+{
+	currentInstance->SpecialInputUp(key, x, y);
+}
+void timercallback(int v)
+{
+	currentInstance->timer(v);
 }
 
 // Initializes GLUT, the display mode, and main window; registers callbacks;
@@ -59,9 +71,11 @@ Scene::Scene(int argc, char** argv) {
 	::currentInstance = this;
 	glutReshapeFunc(reshapecallback);
 	glutDisplayFunc(displaycallback);
-	//glutTimerFunc(100, timercallback, 0);
+	glutTimerFunc(100, timercallback, 0);
 	glutKeyboardFunc(keyboardcallback);
+	glutKeyboardUpFunc(keyboardupcallback);
 	glutSpecialFunc(Specialcallback);
+	glutSpecialUpFunc(Specialupcallback);
 
 	glutMainLoop();
 
@@ -164,8 +178,22 @@ void Scene::keyboard(unsigned char key, int x, int y) {
 	glutPostRedisplay();
 }
 
-void Scene::SpecialInput(int key, int x, int y)
-{
+// Handles keyboard after press
+void Scene::keyboardUp(unsigned char key, int x, int y) {
+	// imgui keyboard func
+	ImGui_ImplGLUT_KeyboardUpFunc(key, x, y);
+
+	key = tolower(key);
+	if (key == 'w' || key == 's') {
+		close_legs_vert = true;
+	}
+	if (key == 'a' || key == 'd') {
+		close_legs_hor = true;
+	}
+}
+
+
+void Scene::SpecialInput(int key, int x, int y) {
 	ImGui_ImplGLUT_SpecialFunc(key, x, y);
 
 	switch (key)
@@ -185,6 +213,40 @@ void Scene::SpecialInput(int key, int x, int y)
 	}
 }
 
+void Scene::SpecialInputUp(int key, int x, int y) {
+	ImGui_ImplGLUT_SpecialUpFunc(key, x, y);
+
+	if (key == GLUT_KEY_UP || key == GLUT_KEY_DOWN ) {
+		close_legs_vert = true;
+	}
+	if (key == GLUT_KEY_LEFT || key == GLUT_KEY_RIGHT) {
+		close_legs_hor = true;
+	}
+}
+
+void Scene::timer(int v) {
+	if (wag_tail) {
+		dog->wagTail();
+		glutPostRedisplay();
+	}
+	if (close_legs_vert && abs(dog->organsAngles[DOG_LEFT_BACK_LEG][true]) >= 3.0f) {
+		dog->moveLegs(3.0f, true);
+		glutPostRedisplay();
+	}
+	else
+	{
+		close_legs_vert = false;
+	}
+	if (close_legs_hor && abs(dog->organsAngles[DOG_LEFT_BACK_LEG][false]) >= 8.0f) {
+		dog->moveLegs(8.0f, false);
+		glutPostRedisplay();
+	}
+	else
+	{
+		close_legs_hor = false;
+	}
+	glutTimerFunc(1000 / 60, timercallback, v);
+}
 
 // Handles the window reshape event
 void Scene::reshape(GLint w, GLint h) {
@@ -285,6 +347,7 @@ void Scene::display_menu()
 					ImGui::SliderFloat("DOG_RIGHT_FRONT_LEG angle horizontal", &this->dog->organsAngles[DOG_RIGHT_FRONT_LEG][false], -this->dog->maxOrgansAngles[DOG_RIGHT_FRONT_LEG][false], this->dog->maxOrgansAngles[DOG_RIGHT_FRONT_LEG][false]);
 					ImGui::SliderFloat("DOG_RIGHT_FRONT_LEG angle vertical", &this->dog->organsAngles[DOG_RIGHT_FRONT_LEG][true], -this->dog->maxOrgansAngles[DOG_RIGHT_FRONT_LEG][true], this->dog->maxOrgansAngles[DOG_RIGHT_FRONT_LEG][true]);
 				}
+				ImGui::Checkbox("wag tail", &wag_tail);      HelpMarker("the dog's tail will swing every frame");
 			}
 			
 			if (ImGui::CollapsingHeader("Lights"))

@@ -37,6 +37,9 @@ static float ambient_intensity = 0.2f;
 // others
 static bool debug_mode = false;
 static bool show_menu = true;
+static bool wag_tail = false;
+static bool close_legs_hor = false;
+static bool close_legs_vert = false;
 
 
 // imgui state
@@ -58,7 +61,10 @@ public:
 	Scene(int argc, char** argv);
 	void display(); // Function where the scene drawing occures	
 	void keyboard(unsigned char key, int x, int y); // Function for keyboard press
+	void keyboardUp(unsigned char key, int x, int y);
 	void reshape(GLint w, GLint h); // Function to handle reshape of the screen
 	void SpecialInput(int key, int x, int y); // Function to handle arrows key
+	void SpecialInputUp(int key, int x, int y);
+	void timer(int v);
 };
 
