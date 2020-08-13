@@ -2,7 +2,8 @@
 
 Dog::Dog(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ, glm::vec3 upVector, glm::vec3 towardVector, GLfloat angle) : 
 	ObjectGL(inputfile, PosX, PosY, PosZ, upVector, towardVector, angle) {
-	this->sideVector = glm::cross(this->upVector, this->towardVector);
+	this->orignalSideVector = glm::cross(this->upVector, this->towardVector);
+	this->sideVector = glm::vec3(orignalSideVector.x, orignalSideVector.y, orignalSideVector.z);
 	string shape;
 	for (size_t s = 0; s < this->shapes.size(); s++) {
 		shape = this->shapes[s].name;
@@ -48,7 +49,7 @@ void Dog::rotateOrgan(GLfloat angle, int organ, bool vertical) {
 void Dog::handleRotation(int organ) {
 	glTranslatef(organsPos[organ][0], organsPos[organ][1], organsPos[organ][2]);
 	glRotatef(organsAngles[organ][false], this->upVector.x, this->upVector.y, this->upVector.z);
-	glRotatef(organsAngles[organ][true], sideVector.x, sideVector.y, sideVector.z);
+	glRotatef(organsAngles[organ][true], orignalSideVector.x, orignalSideVector.y, orignalSideVector.z);
 	glTranslatef(-organsPos[organ][0], -organsPos[organ][1], -organsPos[organ][2]);
 }
 

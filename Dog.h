@@ -55,6 +55,7 @@ class Dog : public ObjectGL {
 		bool legs_turn_right = true;
 	private:
 		glm::vec3 sideVector;
+		glm::vec3 orignalSideVector;
 		bool tail_turn_right = true;
 		GLfloat legs_angle_per_step = 3.0f;
 		GLfloat legs_angle_per_rotate = 8.0f;

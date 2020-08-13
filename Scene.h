@@ -17,6 +17,7 @@ using namespace std;
 #include "Floor.h"
 #include "Light.h"
 #include "Dog.h"
+#include "Walls.h"
 
 // window vars
 const int WINDOW_WIDTH = 1500;
@@ -57,6 +58,7 @@ private:
 	ObjectGL* table;
 	Light* flashlight;
 	Floor* floor;
+	Walls* walls;
 	void drawCoordinateArrows();
 	static Scene* currentInstance;
 	void display_menu();

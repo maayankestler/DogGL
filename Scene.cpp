@@ -45,6 +45,7 @@ Scene::Scene(int argc, char** argv) {
 	this->dog = new Dog("GermanShephardLowPoly.obj", 0, 0, 0, glm::vec3(0, 1, 0), glm::vec3(-1, 0, 0));
 	this->dog->addTask([]() { glScalef(0.5f, 0.5f, 0.5f); });
 	this->floor = new Floor(-10, 10, -10, 10);
+	this->walls = new Walls(10, -10, 10, -10, 10);
 	this->statue = new ObjectGL("venus_polygonal_statue.obj", -8, 0, -8);
 	this->statue->addTask([]() { glScalef(0.07f, 0.07f, 0.07f); });
 	this->statue->angle = 180;
@@ -139,6 +140,10 @@ void Scene::display() {
 	table->draw();
 	dog->draw();
 	flashlight->draw();
+	glEnable(GL_BLEND);
+	walls->draw();
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_BLEND);
 
 	// add Coordinate Arrows for debug
 	drawCoordinateArrows();
@@ -330,6 +335,14 @@ void Scene::display_menu()
 			if (ImGui::CollapsingHeader("Room")) {
 				ImGui::ColorEdit3("floor color1", (float*)(&this->floor->color1)); HelpMarker("the floor's first color");
 				ImGui::ColorEdit3("floor color2", (float*)(&this->floor->color2)); HelpMarker("the floor's seconde color");
+				ImGui::ColorEdit3("walls color", (float*)(&this->walls->color)); HelpMarker("the walls seconde color");
+				ImGui::SliderFloat("walls alpha", &walls->alpha, 0.0f,1.0f); HelpMarker("the walls transperncy");
+				if (debug_mode) {
+					ImGui::Checkbox("south wall", &walls->showSouth);
+					ImGui::Checkbox("north wall", &walls->showNorth);
+					ImGui::Checkbox("east wall", &walls->showEast);
+					ImGui::Checkbox("west wall", &walls->showWest);
+				}
 			}
 
 			if (ImGui::CollapsingHeader("Camera"))
