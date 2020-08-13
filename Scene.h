@@ -16,6 +16,7 @@ using namespace std;
 #include "ObjectGL.h"
 #include "Floor.h"
 #include "Light.h"
+#include "Dog.h"
 
 // window vars
 const int WINDOW_WIDTH = 1500;
@@ -34,8 +35,14 @@ static GLfloat currentAngleOfRotation = 0.0;
 static float ambient_intensity = 0.2f;
 
 // others
-static bool show_coordinates = true;
+static bool debug_mode = false;
 static bool show_menu = true;
+
+// dog
+static bool wag_tail = false;
+static bool close_legs_hor = false;
+static bool close_legs_vert = false;
+static bool dog_view = false;
 
 
 // imgui state
@@ -45,7 +52,7 @@ static void HelpMarker(const char* desc);
 class Scene
 {
 private:	
-	ObjectGL* dog;
+	Dog* dog;
 	ObjectGL* statue;
 	ObjectGL* table;
 	Light* flashlight;
@@ -57,7 +64,10 @@ public:
 	Scene(int argc, char** argv);
 	void display(); // Function where the scene drawing occures	
 	void keyboard(unsigned char key, int x, int y); // Function for keyboard press
+	void keyboardUp(unsigned char key, int x, int y);
 	void reshape(GLint w, GLint h); // Function to handle reshape of the screen
 	void SpecialInput(int key, int x, int y); // Function to handle arrows key
+	void SpecialInputUp(int key, int x, int y);
+	void timer(int v);
 };
 

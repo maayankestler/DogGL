@@ -24,7 +24,7 @@ const string OBJECTS_DIR = "objects";
 const string TEXTURES_DIR = "textures";
 
 class ObjectGL {
-	private:
+	protected:
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;
@@ -32,6 +32,7 @@ class ObjectGL {
 	public:
 		ObjectGL(string inputfile, GLfloat PosX = 0, GLfloat PosY = 0, GLfloat PosZ = 0, 
 			     glm::vec3 upVector = glm::vec3(0, 1, 0), glm::vec3 towardVector = glm::vec3(0, 0, 0), GLfloat angle = 0);
+		ObjectGL() = default;
 		string inputfile;
 		GLfloat PosX;
 		GLfloat PosZ;
@@ -39,11 +40,11 @@ class ObjectGL {
 		GLfloat angle;
 		glm::vec3 towardVector;
 		glm::vec3 upVector;
-		vector<function<void()>> tasks;
+		map<string, vector<function<void()>>> shapesTasks;
 		void draw();
 		void setPosition(GLfloat x, GLfloat y, GLfloat z);
 		void rotate(GLfloat angle);
-		void addTask(function<void()> func);
-		void walk(float distance);
+		void addTask(function<void()> func, string shape = "GLOBAL");
+		void walk(GLfloat distance);
 		static GLuint create_texture(string texture_filename);
 };

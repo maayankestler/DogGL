@@ -49,6 +49,10 @@ ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ,
 	this->shapes = shapes;
 	this->materials = materials;
 
+	for (size_t s = 0; s < this->shapes.size(); s++) {
+		this->shapesTasks[this->shapes[s].name] = vector<function<void()>>(); // insert empty vector
+	}
+
 	// create textures
 	this->textures[""] = 0;
 	GLuint texture_id;
@@ -74,12 +78,17 @@ void ObjectGL::draw() {
 	glRotatef(angle, this->upVector.x, this->upVector.y, this->upVector.z);
 
 	// call all the tasks in the vector
-	for (function<void()> task : this->tasks) {
+	for (function<void()> task : this->shapesTasks["GLOBAL"]) {
 		task();
 	}
 
 	// Loop over shapes
 	for (size_t s = 0; s < this->shapes.size(); s++) {
+		glPushMatrix();
+
+		for (function<void()> task : this->shapesTasks[this->shapes[s].name]) {
+			task();
+		}
 
 		// Loop over faces(polygon)
 		size_t index_offset = 0;
@@ -127,6 +136,7 @@ void ObjectGL::draw() {
 
 			index_offset += fv;
 		}
+		glPopMatrix();
 	}
 	// clear texture
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -140,21 +150,20 @@ void ObjectGL::setPosition(GLfloat x, GLfloat y, GLfloat z) {
 	this->PosZ = z;
 }
 
-void ObjectGL::walk(float distance) {
+void ObjectGL::walk(GLfloat distance) {
 	float x = this->PosX + distance * this->towardVector.x;
 	float y = this->PosY + distance * this->towardVector.y;
 	float z = this->PosZ + distance * this->towardVector.z;
 	setPosition(x, y, z);
 }
 
-void ObjectGL::addTask(function<void()> func) {
-	this->tasks.push_back(func);
+void ObjectGL::addTask(function<void()> func, string shape) {
+	this->shapesTasks[shape].push_back(func);
 }
 
 void ObjectGL::rotate(GLfloat angle) {
 	float rad_angle = (angle / 180) * glm::pi<float>(); // use radians
 	glm::mat4 rotationMat(1);
-	glm::vec3 cross = glm::cross(this->upVector, this->towardVector);
 	rotationMat = glm::rotate(rotationMat, rad_angle, this->upVector);
 	this->towardVector = glm::vec3(rotationMat * glm::vec4(this->towardVector, 1.0));
 	this->angle += angle;
