@@ -93,7 +93,7 @@ void Scene::display() {
 
 	// display the menu with imgui
 	if (show_menu)
-        display_menu();
+		display_menu();
 
 	// Rendering
 	ImGui::Render();
@@ -102,9 +102,19 @@ void Scene::display() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(60.0, aspect, 1, 100.0);
-	gluLookAt(camera_position[0], camera_position[1], camera_position[2],
-              camera_target[0], camera_target[1], camera_target[2],
-		      0, 1, 0);
+	if (dog_view) {
+		glm::vec3 dog_view_pos = dog->getViewPos();
+		glm::vec3 dog_view_targe = dog->getViewTarget();
+		gluLookAt(dog_view_pos[0], dog_view_pos[1], dog_view_pos[2],
+			dog_view_targe[0], dog_view_targe[1], dog_view_targe[2],
+			0, 1, 0);
+	}
+	else
+	{
+		gluLookAt(camera_position[0], camera_position[1], camera_position[2],
+			camera_target[0], camera_target[1], camera_target[2],
+			0, 1, 0);
+	}
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
@@ -333,6 +343,7 @@ void Scene::display_menu()
 			}
 
 			if (ImGui::CollapsingHeader("Dog")) {
+				ImGui::Checkbox("dog view", &dog_view); HelpMarker("see the world from the dog's eyes");
 				ImGui::SliderFloat("head angle horizontal", &this->dog->organsAngles[DOG_HEAD][false], -this->dog->maxOrgansAngles[DOG_HEAD][false], this->dog->maxOrgansAngles[DOG_HEAD][false]);
 				ImGui::SliderFloat("head angle vertical", &this->dog->organsAngles[DOG_HEAD][true], -this->dog->maxOrgansAngles[DOG_HEAD][true], this->dog->maxOrgansAngles[DOG_HEAD][true]);
 				ImGui::SliderFloat("tail angle horizontal", &this->dog->organsAngles[DOG_TAIL][false], -this->dog->maxOrgansAngles[DOG_TAIL][false], this->dog->maxOrgansAngles[DOG_TAIL][false]);

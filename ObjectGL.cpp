@@ -164,7 +164,6 @@ void ObjectGL::addTask(function<void()> func, string shape) {
 void ObjectGL::rotate(GLfloat angle) {
 	float rad_angle = (angle / 180) * glm::pi<float>(); // use radians
 	glm::mat4 rotationMat(1);
-	glm::vec3 cross = glm::cross(this->upVector, this->towardVector);
 	rotationMat = glm::rotate(rotationMat, rad_angle, this->upVector);
 	this->towardVector = glm::vec3(rotationMat * glm::vec4(this->towardVector, 1.0));
 	this->angle += angle;

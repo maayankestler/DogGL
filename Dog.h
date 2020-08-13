@@ -9,6 +9,7 @@ using namespace std;
 #define DOG_RIGHT_BACK_LEG  3
 #define DOG_LEFT_FRONT_LEG  4
 #define DOG_RIGHT_FRONT_LEG 5
+#define DOG_EYES            6
 
 class Dog : public ObjectGL {
 	//using ObjectGL::ObjectGL;
@@ -17,12 +18,13 @@ class Dog : public ObjectGL {
 			glm::vec3 upVector = glm::vec3(0, 1, 0), glm::vec3 towardVector = glm::vec3(0, 0, 0), GLfloat angle = 0);
 		map<int, vector<GLfloat>> organsPos = {
 		//      organ			                 pos
-			{DOG_HEAD,            { -2.4644, 4.9088, 0        } },
-			{DOG_TAIL,            { 2.9906,  3.8998, 0        } },
-			{DOG_LEFT_BACK_LEG,   { 1.8531,  3.6308, 1.0157   } },
-			{DOG_RIGHT_BACK_LEG,  { 1.8531,  3.6308, -1.0157  } },
-			{DOG_LEFT_FRONT_LEG,  { -1.185,  2.2522, 0.78169  } },
-			{DOG_RIGHT_FRONT_LEG, { -1.185,  2.2522, -0.78169 } }
+			{DOG_HEAD,            { -2.4644f, 4.9088f, 0.0f      } },
+			{DOG_TAIL,            { 2.9906f,  3.8998f, 0.0f      } },
+			{DOG_LEFT_BACK_LEG,   { 1.8531f,  3.6308f, 1.0157f   } },
+			{DOG_RIGHT_BACK_LEG,  { 1.8531f,  3.6308f, -1.0157f  } },
+			{DOG_LEFT_FRONT_LEG,  { -1.185f,  2.2522f, 0.78169f  } },
+			{DOG_RIGHT_FRONT_LEG, { -1.185f,  2.2522f, -0.78169f } },
+			{DOG_EYES,			  { -3.3146f,  5.897f, 0.0f      } }
 		};
 		map<int, map<bool, float>> maxOrgansAngles = {
 	    //    organ			         vertical max   horizontal max
@@ -47,6 +49,8 @@ class Dog : public ObjectGL {
 		void rotate(GLfloat angle);
 		void wagTail(GLfloat angle = 5.0f);
 		void moveLegs(GLfloat angle, bool vertical = true);
+		glm::vec3 getViewPos();
+		glm::vec3 getViewTarget();
 		bool right_legs_forward = true;
 		bool legs_turn_right = true;
 	private:
@@ -55,4 +59,5 @@ class Dog : public ObjectGL {
 		GLfloat legs_angle_per_step = 3.0f;
 		GLfloat legs_angle_per_rotate = 8.0f;
 		void handleRotation(int organ);
+		glm::vec3 getViewVector();
 };

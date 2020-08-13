@@ -37,9 +37,12 @@ static float ambient_intensity = 0.2f;
 // others
 static bool debug_mode = false;
 static bool show_menu = true;
+
+// dog
 static bool wag_tail = false;
 static bool close_legs_hor = false;
 static bool close_legs_vert = false;
+static bool dog_view = false;
 
 
 // imgui state

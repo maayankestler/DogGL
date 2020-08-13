@@ -60,6 +60,7 @@ void Dog::walk(GLfloat distance) {
 void Dog::rotate(GLfloat angle) {
 	moveLegs(legs_angle_per_rotate, false);
 	ObjectGL::rotate(angle);
+	this->sideVector = glm::cross(this->upVector, this->towardVector);
 }
 
 void Dog::wagTail(GLfloat angle) {
@@ -109,4 +110,35 @@ void Dog::moveLegs(GLfloat angle, bool vertical) {
 			rotateOrgan(-angle, DOG_LEFT_FRONT_LEG, vertical);
 		}
 	}
+}
+
+glm::vec3 Dog::getViewPos() {
+	glm::vec3 eyes = glm::vec3(organsPos[DOG_EYES][0] / 2, organsPos[DOG_EYES][1] / 2, organsPos[DOG_EYES][2] / 2); // model eyes pos TODO change object and stop divide by half (or use scale vars)
+	// start rotate by cur angle
+	float rad_angle = (angle / 180) * glm::pi<float>(); // use radians
+	glm::mat4 rotationMat(1);
+	rotationMat = glm::rotate(rotationMat, rad_angle, this->upVector);
+	eyes = glm::vec3(rotationMat * glm::vec4(eyes, 1.0));
+	eyes += glm::vec3(PosX, PosY, PosZ); // add cur pos
+	return eyes;
+}
+
+glm::vec3 Dog::getViewTarget() {
+	glm::vec3 view_vector = getViewVector();
+	glm::vec3 eyes = getViewPos();
+	return eyes + view_vector;
+}
+
+glm::vec3 Dog::getViewVector() {
+	glm::vec3 view_vector = towardVector;
+
+	float rad_angle = (organsAngles[DOG_HEAD][true] / 180) * glm::pi<float>(); // use radians
+	glm::mat4 rotationMat(1);
+	rotationMat = glm::rotate(rotationMat, rad_angle, this->sideVector);
+	view_vector = glm::vec3(rotationMat * glm::vec4(view_vector, 1.0));
+
+	rad_angle = (organsAngles[DOG_HEAD][false] / 180) * glm::pi<float>();
+	rotationMat = glm::rotate(rotationMat, rad_angle, this->upVector);
+	view_vector = glm::vec3(rotationMat * glm::vec4(view_vector, 1.0));
+	return view_vector;
 }
