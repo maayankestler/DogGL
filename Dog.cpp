@@ -1,7 +1,7 @@
 #include "Dog.h"
 
-Dog::Dog(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ, glm::vec3 upVector, glm::vec3 towardVector, GLfloat angle) : 
-	ObjectGL(inputfile, PosX, PosY, PosZ, upVector, towardVector, angle) {
+Dog::Dog(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ, GLfloat scale, glm::vec3 upVector, glm::vec3 towardVector, GLfloat angle) :
+	ObjectGL(inputfile, PosX, PosY, PosZ, scale, upVector, towardVector, angle) {
 	this->orignalSideVector = glm::cross(this->upVector, this->towardVector);
 	this->sideVector = glm::vec3(orignalSideVector.x, orignalSideVector.y, orignalSideVector.z);
 	string shape;

@@ -1,11 +1,13 @@
 #include "Walls.h"
 
-Walls::Walls(GLfloat height, GLfloat xMin, GLfloat xMax, GLfloat yMin, GLfloat yMax) {
+Walls::Walls(GLfloat height, GLfloat xMin, GLfloat xMax, GLfloat yMin, GLfloat yMax, int rows, int columns) {
 	this->xMin = xMin;
 	this->xMax = xMax;
 	this->yMin = yMin;
 	this->yMax = yMax;
 	this->height = height;
+	this->rows = rows;
+	this->columns = columns;
 }
 
 void Walls::draw() {
@@ -21,39 +23,73 @@ void Walls::draw() {
 	glMaterialf(GL_FRONT, GL_SHININESS, shininess);
 	GLfloat wall_color[4] = { this->color[0], this->color[1], this->color[2], this->alpha };
 
+	float width, row_step, column_step;
+	row_step = height / (float)columns;
 	glBegin(GL_QUADS);
 		glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, wall_color);
 		if (showSouth) {
-			glNormal3d(0, 0, -1);
-			//glTexCoord2f(0.0, 0.0);
-			glVertex3f(xMin, 0, yMin);
-			//glTexCoord2f(1.0, 0.0);
-			glVertex3f(xMin, height, yMin);
-			//glTexCoord2f(0.0, 1.0);
-			glVertex3f(xMax, height, yMin);
-			//glTexCoord2f(1.0, 1.0);
-			glVertex3f(xMax, 0, yMin);
+			width = glm::distance(glm::vec2(xMin, yMin), glm::vec2(xMax, yMin));
+			column_step = width / (float)columns;
+			for (int row = 0; row < rows; row++)
+			{
+				for (int column = 0; column < columns; column++)
+				{
+					//glTexCoord2f(0.0, 0.0);
+					glVertex3f(xMin + column * column_step, row * row_step, yMin );
+					//glTexCoord2f(1.0, 0.0);
+					glVertex3f(xMin + (column + 1) * column_step, row * row_step, yMin);
+					//glTexCoord2f(1.0, 1.0);
+					glVertex3f(xMin + (column + 1) * column_step, (row + 1) * row_step, yMin);
+					//glTexCoord2f(0.0, 1.0);
+					glVertex3f(xMin + column * column_step, (row + 1) * row_step, yMin);
+				}
+			}
 		}
 		if (showNorth) {
-			glNormal3d(0, 0, 1);
-			glVertex3f(xMin, 0, yMax);
-			glVertex3f(xMin, height, yMax);
-			glVertex3f(xMax, height, yMax);
-			glVertex3f(xMax, 0, yMax);
+			width = glm::distance(glm::vec2(xMin, yMax), glm::vec2(xMax, yMax));
+			column_step = width / (float)columns;
+			for (int row = 0; row < rows; row++)
+			{
+				for (int column = 0; column < columns; column++)
+				{
+					//glTexCoord2f(0.0, 0.0);
+					glVertex3f(xMin + column * column_step, row * row_step, yMax);
+					//glTexCoord2f(1.0, 0.0);
+					glVertex3f(xMin + (column + 1) * column_step, row * row_step, yMax);
+					//glTexCoord2f(1.0, 1.0);
+					glVertex3f(xMin + (column + 1) * column_step, (row + 1) * row_step, yMax);
+					//glTexCoord2f(0.0, 1.0);
+					glVertex3f(xMin + column * column_step, (row + 1) * row_step, yMax);
+				}
+			}
 		}
 		if (showWest) {
-			glNormal3d(1, 0, 0);
-			glVertex3f(xMin, 0, yMin);
-			glVertex3f(xMin, height, yMin);
-			glVertex3f(xMin, height, yMax);
-			glVertex3f(xMin, 0, yMax);
+			width = glm::distance(glm::vec2(xMin, yMin), glm::vec2(xMin, yMax));
+			column_step = width / (float)columns;
+			for (int row = 0; row < rows; row++)
+			{
+				for (int column = 0; column < columns; column++)
+				{
+					glVertex3f(xMin, row * row_step, yMin + column * column_step);
+					glVertex3f(xMin, row * row_step, yMin + (column + 1) * column_step);
+					glVertex3f(xMin, (row + 1) * row_step, yMin + (column + 1) * column_step);
+					glVertex3f(xMin, (row + 1) * row_step, yMin + column * column_step);
+				}
+			}
 		}
 		if (showEast) {
-			glNormal3d(-1, 0, 0);
-			glVertex3f(xMax, 0, yMin);
-			glVertex3f(xMax, height, yMin);
-			glVertex3f(xMax, height, yMax);
-			glVertex3f(xMax, 0, yMax);
+			width = glm::distance(glm::vec2(xMax, yMin), glm::vec2(xMax, yMax));
+			column_step = width / (float)columns;
+			for (int row = 0; row < rows; row++)
+			{
+				for (int column = 0; column < columns; column++)
+				{
+					glVertex3f(xMax, row * row_step, yMin + column * column_step);
+					glVertex3f(xMax, row * row_step, yMin + (column + 1) * column_step);
+					glVertex3f(xMax, (row + 1) * row_step, yMin + (column + 1) * column_step);
+					glVertex3f(xMax, (row + 1) * row_step, yMin + column * column_step);
+				}
+			}
 		}
 	glEnd();
 

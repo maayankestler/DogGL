@@ -42,18 +42,23 @@ Scene::Scene(int argc, char** argv) {
 	glutCreateWindow("dog world");
 	
 	// create drawing objects
-	this->dog = new Dog("GermanShephardLowPoly.obj", 0, 0, 0, glm::vec3(0, 1, 0), glm::vec3(-1, 0, 0));
-	this->dog->addTask([]() { glScalef(0.5f, 0.5f, 0.5f); });
+	this->dog = new Dog("GermanShephardLowPoly.obj", 0, 0, 0, 0.5f, glm::vec3(0, 1, 0), glm::vec3(-1, 0, 0));
 	this->floor = new Floor(-10, 10, -10, 10);
 	this->walls = new Walls(10, -10, 10, -10, 10);
-	this->statue = new ObjectGL("venus_polygonal_statue.obj", -8, 0, -8);
-	this->statue->addTask([]() { glScalef(0.07f, 0.07f, 0.07f); });
+	this->statue = new ObjectGL("venus_polygonal_statue.obj", -8, 0, -8, 0.07f);
 	this->statue->angle = 180;
-	this->table = new ObjectGL("abciuppa_table_w_m_01.obj", 6, 0, 6);
-	this->table->addTask([]() { glScalef(3.0f, 3.0f, 3.0f); });
-	this->flashlight = new Light(GL_LIGHT0, 0, 8, 0, "Flashlight.obj");
+	this->table = new ObjectGL("abciuppa_table_w_m_01.obj", -6, 0, 6, 3.0f);
+	this->chair = new ObjectGL("Chair.obj");
+	this->chair->scale = 0.75f;
+	this->tv = new ObjectGL("televison.obj", 5.6f, 4, -8.5f, 1.0f);
+	this->tv->addTask([]() { glScalef(0.7f, 1, 1); });
+	this->sofa = new ObjectGL("Sofa.obj", 5.6f, 0, 2.0f, 0.075f);
+	this->sofa->angle = 180;
+	//this->canvas = new ObjectGL("tripod.obj", 6.5f, 0, 8.0f, 17.0f);
+	//this->canvas->addTask([]() { glScalef(1, 1.5f, 1); });
+	//this->canvas->angle = 270;
+	this->flashlight = new Light(GL_LIGHT0, 0, 8, 0, "Flashlight.obj", 0.2f);
 	this->flashlight->towardVector = glm::vec3(0, 0, 1);
-	this->flashlight->object->addTask([]() { glScalef(0.2f, 0.2f, 0.2f); });
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -139,10 +144,17 @@ void Scene::display() {
 	statue->draw();
 	table->draw();
 	dog->draw();
+	tv->draw();
+	sofa->draw();
+	chair->PosX = -6; chair->PosZ = 3; chair->angle = 90; // first chair pos
+	chair->draw();
+	chair->PosX = -7.5f; chair->PosZ = 6.5f; chair->angle = 180; // seconde chair pos
+	chair->draw();
 	flashlight->draw();
+	//canvas->draw();
 	glEnable(GL_BLEND);
-	walls->draw();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	walls->draw();
 	glDisable(GL_BLEND);
 
 	// add Coordinate Arrows for debug
@@ -189,6 +201,9 @@ void Scene::keyboard(unsigned char key, int x, int y) {
 	}
 	else if (key == 't') {
 		dog->rotateOrgan(-1.0f, DOG_HEAD, true);
+	}
+	else if (key == 'v') {
+		dog_view = !dog_view;
 	}
 	glutPostRedisplay();
 }
@@ -333,6 +348,50 @@ void Scene::display_menu()
 				ImGui::Checkbox("Demo imgui Window", &show_demo_window);
 
 			if (ImGui::CollapsingHeader("Room")) {
+				if (debug_mode) {
+					if (ImGui::CollapsingHeader("tv")) {
+						ImGui::SliderFloat("tv scale", &this->tv->scale, 0.0f, 3.0f);
+						ImGui::SliderFloat("tv pos x", &this->tv->PosX, -10.0f, 10.0f);
+						ImGui::SliderFloat("tv pos y", &this->tv->PosY, -10.0f, 10.0f);
+						ImGui::SliderFloat("tv pos z", &this->tv->PosZ, -10.0f, 10.0f);
+						ImGui::SliderFloat("tv angle", &this->tv->angle, 0.0f, 360.0f);
+					}
+					//if (ImGui::CollapsingHeader("canvas")) {
+					//	ImGui::SliderFloat("canvas scale", &this->canvas->scale, 0.0f, 100.0f);
+					//	ImGui::SliderFloat("canvas pos x", &this->canvas->PosX, -10.0f, 10.0f);
+					//	ImGui::SliderFloat("canvas pos y", &this->canvas->PosY, -10.0f, 10.0f);
+					//	ImGui::SliderFloat("canvas pos z", &this->canvas->PosZ, -10.0f, 10.0f);
+					//	ImGui::SliderFloat("canvas angle", &this->canvas->angle, 0.0f, 360.0f);
+					//}
+					if (ImGui::CollapsingHeader("sofa")) {
+						ImGui::SliderFloat("sofa scale", &this->sofa->scale, 0.0f, 0.1f);
+						ImGui::SliderFloat("sofa pos x", &this->sofa->PosX, -10.0f, 10.0f);
+						ImGui::SliderFloat("sofa pos y", &this->sofa->PosY, -10.0f, 10.0f);
+						ImGui::SliderFloat("sofa pos z", &this->sofa->PosZ, -10.0f, 10.0f);
+						ImGui::SliderFloat("sofa angle", &this->sofa->angle, 0.0f, 360.0f);
+					}
+					if (ImGui::CollapsingHeader("statue")) {
+						ImGui::SliderFloat("statue scale", &this->statue->scale, 0.0f, 0.1f);
+						ImGui::SliderFloat("statue pos x", &this->statue->PosX, -10.0f, 10.0f);
+						ImGui::SliderFloat("statue pos y", &this->statue->PosY, -10.0f, 10.0f);
+						ImGui::SliderFloat("statue pos z", &this->statue->PosZ, -10.0f, 10.0f);
+						ImGui::SliderFloat("statue angle", &this->statue->angle, 0.0f, 360.0f);
+					}
+					if (ImGui::CollapsingHeader("table")) {
+						ImGui::SliderFloat("table scale", &this->table->scale, 0.0f, 5.0f);
+						ImGui::SliderFloat("table pos x", &this->table->PosX, -10.0f, 10.0f);
+						ImGui::SliderFloat("table pos y", &this->table->PosY, -10.0f, 10.0f);
+						ImGui::SliderFloat("table pos z", &this->table->PosZ, -10.0f, 10.0f);
+						ImGui::SliderFloat("table angle", &this->table->angle, 0.0f, 360.0f);
+					}
+					if (ImGui::CollapsingHeader("chair")) {
+						ImGui::SliderFloat("chair scale", &this->chair->scale, 0.0f, 5.0f);
+						ImGui::SliderFloat("chair pos x", &this->chair->PosX, -10.0f, 10.0f);
+						ImGui::SliderFloat("chair pos y", &this->chair->PosY, -10.0f, 10.0f);
+						ImGui::SliderFloat("chair pos z", &this->chair->PosZ, -10.0f, 10.0f);
+						ImGui::SliderFloat("chair angle", &this->chair->angle, 0.0f, 360.0f);
+					}
+				}
 				ImGui::ColorEdit3("floor color1", (float*)(&this->floor->color1)); HelpMarker("the floor's first color");
 				ImGui::ColorEdit3("floor color2", (float*)(&this->floor->color2)); HelpMarker("the floor's seconde color");
 				ImGui::ColorEdit3("walls color", (float*)(&this->walls->color)); HelpMarker("the walls seconde color");
@@ -357,6 +416,9 @@ void Scene::display_menu()
 
 			if (ImGui::CollapsingHeader("Dog")) {
 				ImGui::Checkbox("dog view", &dog_view); HelpMarker("see the world from the dog's eyes");
+				if (debug_mode) {
+					ImGui::SliderFloat("dog scale", &this->dog->scale, 0.0f, 1.0f);
+				}
 				ImGui::SliderFloat("head angle horizontal", &this->dog->organsAngles[DOG_HEAD][false], -this->dog->maxOrgansAngles[DOG_HEAD][false], this->dog->maxOrgansAngles[DOG_HEAD][false]);
 				ImGui::SliderFloat("head angle vertical", &this->dog->organsAngles[DOG_HEAD][true], -this->dog->maxOrgansAngles[DOG_HEAD][true], this->dog->maxOrgansAngles[DOG_HEAD][true]);
 				ImGui::SliderFloat("tail angle horizontal", &this->dog->organsAngles[DOG_TAIL][false], -this->dog->maxOrgansAngles[DOG_TAIL][false], this->dog->maxOrgansAngles[DOG_TAIL][false]);
@@ -402,17 +464,17 @@ void Scene::display_menu()
 								case 0:
 									this->flashlight->object = new ObjectGL("Flashlight.obj");
 									this->flashlight->towardVector = glm::vec3(0, 0, 1);
-									this->flashlight->object->addTask([]() { glScalef(0.2f, 0.2f, 0.2f); });
+									this->flashlight->object->scale = 0.2f;
 									break;
 								case 1:
 									this->flashlight->object = new ObjectGL("Linterna.obj");
 									this->flashlight->towardVector = glm::vec3(-1, 0, 0);
-									this->flashlight->object->addTask([]() { glScalef(0.2f, 0.2f, 0.2f); });
+									this->flashlight->object->scale = 0.2f;
 									break;
 								case 2:
 									this->flashlight->object = new ObjectGL("3d-model.obj");
 									this->flashlight->towardVector = glm::vec3(-1, 0, 0);
-									this->flashlight->object->addTask([]() { glScalef(0.01f, 0.01f, 0.01f); });
+									this->flashlight->object->scale = 0.01f;
 									break;
 								}
 							}

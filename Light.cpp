@@ -1,6 +1,6 @@
 #include "Light.h"
 
-Light::Light(int id, GLfloat PosX, GLfloat PosY, GLfloat PosZ, string object,
+Light::Light(int id, GLfloat PosX, GLfloat PosY, GLfloat PosZ, string object, GLfloat scale,
 		     GLfloat cutoff, GLfloat exponent,
 	         GLfloat TargetX, GLfloat TargetY, GLfloat TargetZ) {
 	this->id = id;
@@ -16,6 +16,7 @@ Light::Light(int id, GLfloat PosX, GLfloat PosY, GLfloat PosZ, string object,
 
 	if (object.length() > 0) {
 		this->object = new ObjectGL(object);
+		this->object->scale = scale;
 	}
 
 	enable();

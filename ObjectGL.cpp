@@ -2,7 +2,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "ObjectGL.h"
 
-ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ,
+ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ, GLfloat scale,
 				   glm::vec3 upVector, glm::vec3 towardVector, GLfloat angle) {
 	if (!FileExists(inputfile)) {
 		// Append deafult objects dir.
@@ -13,6 +13,7 @@ ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ,
 	this->upVector = upVector;
 	this->towardVector = towardVector;
 	this->angle = angle;
+	this->scale = scale;
 
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
@@ -76,7 +77,7 @@ void ObjectGL::draw() {
 
 	glTranslatef(PosX, PosY, PosZ);
 	glRotatef(angle, this->upVector.x, this->upVector.y, this->upVector.z);
-
+	glScalef(scale, scale, scale);
 	// call all the tasks in the vector
 	for (function<void()> task : this->shapesTasks["GLOBAL"]) {
 		task();

@@ -56,6 +56,10 @@ private:
 	Dog* dog;
 	ObjectGL* statue;
 	ObjectGL* table;
+	ObjectGL* tv;
+	ObjectGL* sofa;
+	ObjectGL* chair;
+	// ObjectGL* canvas;
 	Light* flashlight;
 	Floor* floor;
 	Walls* walls;

@@ -19,8 +19,8 @@ void Floor::draw()
 	//glBindTexture(GL_TEXTURE_2D, this->texture_id);
 
 	float width = xMax - xMin;
-	float hight = yMax - yMin;
-	float row_step = hight / (float)columns;
+	float height = yMax - yMin;
+	float row_step = height / (float)columns;
 	float column_step = width / (float)columns;
 
 	GLfloat specular[] = { 1.0f, 1.0f, 1.0f };

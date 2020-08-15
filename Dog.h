@@ -14,7 +14,7 @@ using namespace std;
 class Dog : public ObjectGL {
 	//using ObjectGL::ObjectGL;
 	public:
-		Dog(string inputfile, GLfloat PosX = 0, GLfloat PosY = 0, GLfloat PosZ = 0,
+		Dog(string inputfile, GLfloat PosX = 0, GLfloat PosY = 0, GLfloat PosZ = 0, GLfloat scale = 1.0f,
 			glm::vec3 upVector = glm::vec3(0, 1, 0), glm::vec3 towardVector = glm::vec3(0, 0, 0), GLfloat angle = 0);
 		map<int, vector<GLfloat>> organsPos = {
 		//      organ			                 pos

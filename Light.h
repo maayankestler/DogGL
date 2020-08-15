@@ -21,7 +21,7 @@ public:
 	ObjectGL* object = NULL; // object to draw
 
 	Light(int id, GLfloat PosX = 0, GLfloat PosY = 10, GLfloat PosZ = 0, string object = "",
-		  GLfloat cutoff = 90.0f, GLfloat exponent = 0.0f,
+		  GLfloat scale = 1.0f, GLfloat cutoff = 90.0f, GLfloat exponent = 0.0f,
 		  GLfloat TargetX = 0, GLfloat TargetY = 0, GLfloat TargetZ = 0);
 	void draw(); // draw the light in the scene
 	void addlight(); // add the lighting of the light
