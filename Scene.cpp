@@ -45,20 +45,25 @@ Scene::Scene(int argc, char** argv) {
 	this->dog = new Dog("GermanShephardLowPoly.obj", 0, 0, 0, 0.5f, glm::vec3(0, 1, 0), glm::vec3(-1, 0, 0));
 	this->floor = new Floor(-10, 10, -10, 10);
 	this->walls = new Walls(10, -10, 10, -10, 10);
-	this->statue = new ObjectGL("venus_polygonal_statue.obj", -8, 0, -8, 0.07f);
-	this->statue->angle = 180;
-	this->table = new ObjectGL("abciuppa_table_w_m_01.obj", -6, 0, 6, 3.0f);
+	this->statue = new ObjectGL("venus_polygonal_statue.obj", 1, 0, -8, 0.07f);
+	this->statue->angle = 160;
+	this->table = new ObjectGL("Table.obj", -6, 0, 6, 0.03f);
+	this->table->angle = 90;
 	this->chair = new ObjectGL("Chair.obj");
 	this->chair->scale = 0.75f;
+	this->dog_house = new ObjectGL("niche.obj", -6, 0, -8, 1.00f);
+	this->dog_house->addTask([]() { glScalef(1, 1.5f, 1); });
+	this->dog_house->angle = 270;
 	this->tv = new ObjectGL("televison.obj", 5.6f, 4, -8.5f, 1.0f);
 	this->tv->addTask([]() { glScalef(0.7f, 1, 1); });
 	this->sofa = new ObjectGL("Sofa.obj", 5.6f, 0, 2.0f, 0.075f);
 	this->sofa->angle = 180;
-	//this->canvas = new ObjectGL("tripod.obj", 6.5f, 0, 8.0f, 17.0f);
-	//this->canvas->addTask([]() { glScalef(1, 1.5f, 1); });
-	//this->canvas->angle = 270;
+	this->books = new ObjectGL("books.obj", 9.5f, 6, -2, 0.01f);
+	this->books->angle = 270;
 	this->flashlight = new Light(GL_LIGHT0, 0, 8, 0, "Flashlight.obj", 0.2f);
 	this->flashlight->towardVector = glm::vec3(0, 0, 1);
+	this->lamp = new Light(GL_LIGHT1, -9.15f, 4, 0, "sconce.obj", 1.0f, 180, 0, -9.15f, 0, 0);
+	this->lamp->object->angle = 270;
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -133,6 +138,7 @@ void Scene::display() {
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_LIGHTING);
 	flashlight->addlight();
+	lamp->addlight();
 	
 
 	GLfloat globalAmbientVec[4] = { ambient_intensity , ambient_intensity, ambient_intensity, 1.0f };
@@ -144,6 +150,7 @@ void Scene::display() {
 	statue->draw();
 	table->draw();
 	dog->draw();
+	dog_house->draw();
 	tv->draw();
 	sofa->draw();
 	chair->PosX = -6; chair->PosZ = 3; chair->angle = 90; // first chair pos
@@ -151,7 +158,8 @@ void Scene::display() {
 	chair->PosX = -7.5f; chair->PosZ = 6.5f; chair->angle = 180; // seconde chair pos
 	chair->draw();
 	flashlight->draw();
-	//canvas->draw();
+	lamp->draw();
+	books->draw();
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	walls->draw();
@@ -342,54 +350,67 @@ void Scene::display_menu()
 
 	{
 		ImGui::Begin("Menu", &show_menu);
-			ImGui::Text("Welcome to my dog room project");
 			ImGui::Checkbox("debug mode", &debug_mode);      HelpMarker("mark to enter debug mode");
 			if (debug_mode)
 				ImGui::Checkbox("Demo imgui Window", &show_demo_window);
 
 			if (ImGui::CollapsingHeader("Room")) {
 				if (debug_mode) {
-					if (ImGui::CollapsingHeader("tv")) {
+					if (ImGui::TreeNode("tv")) {
 						ImGui::SliderFloat("tv scale", &this->tv->scale, 0.0f, 3.0f);
 						ImGui::SliderFloat("tv pos x", &this->tv->PosX, -10.0f, 10.0f);
 						ImGui::SliderFloat("tv pos y", &this->tv->PosY, -10.0f, 10.0f);
 						ImGui::SliderFloat("tv pos z", &this->tv->PosZ, -10.0f, 10.0f);
 						ImGui::SliderFloat("tv angle", &this->tv->angle, 0.0f, 360.0f);
+						ImGui::TreePop();
 					}
-					//if (ImGui::CollapsingHeader("canvas")) {
-					//	ImGui::SliderFloat("canvas scale", &this->canvas->scale, 0.0f, 100.0f);
-					//	ImGui::SliderFloat("canvas pos x", &this->canvas->PosX, -10.0f, 10.0f);
-					//	ImGui::SliderFloat("canvas pos y", &this->canvas->PosY, -10.0f, 10.0f);
-					//	ImGui::SliderFloat("canvas pos z", &this->canvas->PosZ, -10.0f, 10.0f);
-					//	ImGui::SliderFloat("canvas angle", &this->canvas->angle, 0.0f, 360.0f);
-					//}
-					if (ImGui::CollapsingHeader("sofa")) {
+					if (ImGui::TreeNode("dog house")) {
+						ImGui::SliderFloat("dog house scale", &this->dog_house->scale, 0.0f, 3.0f);
+						ImGui::SliderFloat("dog house pos x", &this->dog_house->PosX, -10.0f, 10.0f);
+						ImGui::SliderFloat("dog house pos y", &this->dog_house->PosY, -10.0f, 10.0f);
+						ImGui::SliderFloat("dog house pos z", &this->dog_house->PosZ, -10.0f, 10.0f);
+						ImGui::SliderFloat("dog house angle", &this->dog_house->angle, 0.0f, 360.0f);
+						ImGui::TreePop();
+					}
+					if (ImGui::TreeNode("sofa")) {
 						ImGui::SliderFloat("sofa scale", &this->sofa->scale, 0.0f, 0.1f);
 						ImGui::SliderFloat("sofa pos x", &this->sofa->PosX, -10.0f, 10.0f);
 						ImGui::SliderFloat("sofa pos y", &this->sofa->PosY, -10.0f, 10.0f);
 						ImGui::SliderFloat("sofa pos z", &this->sofa->PosZ, -10.0f, 10.0f);
 						ImGui::SliderFloat("sofa angle", &this->sofa->angle, 0.0f, 360.0f);
+						ImGui::TreePop();
 					}
-					if (ImGui::CollapsingHeader("statue")) {
+					if (ImGui::TreeNode("statue")) {
 						ImGui::SliderFloat("statue scale", &this->statue->scale, 0.0f, 0.1f);
 						ImGui::SliderFloat("statue pos x", &this->statue->PosX, -10.0f, 10.0f);
 						ImGui::SliderFloat("statue pos y", &this->statue->PosY, -10.0f, 10.0f);
 						ImGui::SliderFloat("statue pos z", &this->statue->PosZ, -10.0f, 10.0f);
 						ImGui::SliderFloat("statue angle", &this->statue->angle, 0.0f, 360.0f);
+						ImGui::TreePop();
 					}
-					if (ImGui::CollapsingHeader("table")) {
-						ImGui::SliderFloat("table scale", &this->table->scale, 0.0f, 5.0f);
+					if (ImGui::TreeNode("table")) {
+						ImGui::SliderFloat("table scale", &this->table->scale, 0.0f, 0.1f);
 						ImGui::SliderFloat("table pos x", &this->table->PosX, -10.0f, 10.0f);
 						ImGui::SliderFloat("table pos y", &this->table->PosY, -10.0f, 10.0f);
 						ImGui::SliderFloat("table pos z", &this->table->PosZ, -10.0f, 10.0f);
 						ImGui::SliderFloat("table angle", &this->table->angle, 0.0f, 360.0f);
+						ImGui::TreePop();
 					}
-					if (ImGui::CollapsingHeader("chair")) {
+					if (ImGui::TreeNode("chair")) {
 						ImGui::SliderFloat("chair scale", &this->chair->scale, 0.0f, 5.0f);
 						ImGui::SliderFloat("chair pos x", &this->chair->PosX, -10.0f, 10.0f);
 						ImGui::SliderFloat("chair pos y", &this->chair->PosY, -10.0f, 10.0f);
 						ImGui::SliderFloat("chair pos z", &this->chair->PosZ, -10.0f, 10.0f);
 						ImGui::SliderFloat("chair angle", &this->chair->angle, 0.0f, 360.0f);
+						ImGui::TreePop();
+					}
+					if (ImGui::TreeNode("books")) {
+						ImGui::SliderFloat("books scale", &this->books->scale, 0.0f, 0.05f);
+						ImGui::SliderFloat("books pos x", &this->books->PosX, -10.0f, 10.0f);
+						ImGui::SliderFloat("books pos y", &this->books->PosY, -10.0f, 10.0f);
+						ImGui::SliderFloat("books pos z", &this->books->PosZ, -10.0f, 10.0f);
+						ImGui::SliderFloat("books angle", &this->books->angle, 0.0f, 360.0f);
+						ImGui::TreePop();
 					}
 				}
 				ImGui::ColorEdit3("floor color1", (float*)(&this->floor->color1)); HelpMarker("the floor's first color");
@@ -438,16 +459,35 @@ void Scene::display_menu()
 			
 			if (ImGui::CollapsingHeader("Lights"))
 			{
-				ImGui::SliderFloat("ambient intensity", &ambient_intensity, 0.0f, 1.0f);         HelpMarker("control the intensity of the global ambient");
-				ImGui::ColorEdit3("light color", (float*)(&this->flashlight->color));                  HelpMarker("chose the color of the light");
-				ImGui::SliderFloat("light position x", &this->flashlight->position[0], -10.0f, 10.0f); HelpMarker("the x coordinate of the light position");
-				ImGui::SliderFloat("light position y", &this->flashlight->position[1], -10.0f, 10.0f); HelpMarker("the y coordinate of the light position");
-				ImGui::SliderFloat("light position z", &this->flashlight->position[2], -10.0f, 10.0f); HelpMarker("the x coordinate of the light position");
-				ImGui::SliderFloat("light target x", &this->flashlight->target[0], -10.0f, 10.0f);     HelpMarker("the x coordinate of the position that the light will look at");
-				ImGui::SliderFloat("light target y", &this->flashlight->target[1], -10.0f, 10.0f);     HelpMarker("the y coordinate of the position that the light will look at");
-				ImGui::SliderFloat("light target z", &this->flashlight->target[2], -10.0f, 10.0f);     HelpMarker("the z coordinate of the position that the light will look at");
-				ImGui::SliderFloat("light cutoff", &this->flashlight->cutoff, 0.0f, 180.0f);           HelpMarker("the angle that the light is affective");
-				ImGui::SliderFloat("light exponent", &this->flashlight->exponent, 0.0f, 30.0f);        HelpMarker("the intensity distribution of the light");
+				ImGui::RadioButton("enable flashlight", &fe, 0); ImGui::SameLine();
+				ImGui::RadioButton("disable flashlight", &fe, 1);
+				if (fe == 0) {
+					flashlight->enable();
+				}
+				else
+				{
+					flashlight->disable();
+				}
+				ImGui::RadioButton("enable lamp", &le, 0); ImGui::SameLine();
+				ImGui::RadioButton("disable lamp", &le, 1);
+				if (le == 0) {
+					lamp->enable();
+				}
+				else
+				{
+					lamp->disable();
+				}
+				ImGui::SliderFloat("adjust ambient light", &ambient_intensity, 0.0f, 1.0f);                 HelpMarker("control the intensity of the global ambient");
+				ImGui::ColorEdit3("lamp light color", (float*)(&this->lamp->color));            HelpMarker("chose the color of the lamp's light");
+				ImGui::ColorEdit3("flashlight light color", (float*)(&this->flashlight->color));            HelpMarker("chose the color of the flashlight's light");
+				ImGui::SliderFloat("flashlight position x", &this->flashlight->position[0], -10.0f, 10.0f); HelpMarker("the x coordinate of the flashlight position");
+				ImGui::SliderFloat("flashlight position y", &this->flashlight->position[1], -10.0f, 10.0f); HelpMarker("the y coordinate of the flashlight position");
+				ImGui::SliderFloat("flashlight position z", &this->flashlight->position[2], -10.0f, 10.0f); HelpMarker("the x coordinate of the flashlight position");
+				ImGui::SliderFloat("flashlight target x", &this->flashlight->target[0], -10.0f, 10.0f);     HelpMarker("the x coordinate of the position that the flashlight will look at");
+				ImGui::SliderFloat("flashlight target y", &this->flashlight->target[1], -10.0f, 10.0f);     HelpMarker("the y coordinate of the position that the flashlight will look at");
+				ImGui::SliderFloat("flashlight target z", &this->flashlight->target[2], -10.0f, 10.0f);     HelpMarker("the z coordinate of the position that the flashlight will look at");
+				ImGui::SliderFloat("flashlight cutoff", &this->flashlight->cutoff, 0.0f, 180.0f);           HelpMarker("the angle that the flashlight's light is affective");
+				ImGui::SliderFloat("flashlight exponent", &this->flashlight->exponent, 0.0f, 30.0f);        HelpMarker("the intensity distribution of the flashlight's light");
 
 				if (debug_mode) {
 					const char* items[] = { "Flashlight.obj", "Linterna.obj", "3d-model.obj" };
@@ -487,10 +527,40 @@ void Scene::display_menu()
 						ImGui::EndCombo();
 					}
 					HelpMarker("chose the flashlight form");
+
+					ImGui::SliderFloat("lamp scale", &this->lamp->object->scale, 0.0f, 3.0f);
+					ImGui::SliderFloat("lamp angle", &this->lamp->object->angle, 0.0f, 360.0f);
+					ImGui::SliderFloat("lamp position x", &this->lamp->position[0], -10.0f, 10.0f); HelpMarker("the x coordinate of the lamp position");
+					ImGui::SliderFloat("lamp position y", &this->lamp->position[1], -10.0f, 10.0f); HelpMarker("the y coordinate of the lamp position");
+					ImGui::SliderFloat("lamp position z", &this->lamp->position[2], -10.0f, 10.0f); HelpMarker("the x coordinate of the lamp position");
+					ImGui::SliderFloat("lamp target x", &this->lamp->target[0], -10.0f, 10.0f);     HelpMarker("the x coordinate of the position that the lamp will look at");
+					ImGui::SliderFloat("lamp target y", &this->lamp->target[1], -10.0f, 10.0f);     HelpMarker("the y coordinate of the position that the lamp will look at");
+					ImGui::SliderFloat("lamp target z", &this->lamp->target[2], -10.0f, 10.0f);     HelpMarker("the z coordinate of the position that the lamp will look at");
+					ImGui::SliderFloat("lamp cutoff", &this->lamp->cutoff, 0.0f, 180.0f);           HelpMarker("the angle that the lamp's light is affective");
+					ImGui::SliderFloat("lamp exponent", &this->lamp->exponent, 0.0f, 30.0f);        HelpMarker("the intensity distribution of the lamp's light");
 				}
 			}
 
 			if (ImGui::CollapsingHeader("help")) {
+				ImGui::Text("Welcome to my opengl dog's room project");
+				ImGui::TextWrapped("you can go in the room and explore the objects, you can also use this menu to affect the room.");
+				ImGui::TextWrapped("normally you can see some basic options and with debug mode you almost full control on the scene");
+				ImGui::Separator();
+				ImGui::Text("ROOM:");
+				ImGui::TextWrapped("this category affect the room and it's object, for example you can change the walls and the floor color");
+				ImGui::Separator();
+				ImGui::Text("CAMERA:");
+				ImGui::TextWrapped("this category affect the camera, you can change the settings to see the room from diffrent angles");
+				ImGui::Separator();
+				ImGui::Text("DOG:");
+				ImGui::TextWrapped("this category affect our hero, the dog, you can move it's head and tail.");
+				ImGui::TextWrapped("the main feature here is to se the world from the dog view");
+				ImGui::Separator();
+				ImGui::Text("LIGHTS:");
+				ImGui::TextWrapped("this category affect the lights' the flashlight and the lamp.");
+				ImGui::TextWrapped("you can control the light settings and see how it's affect the objects");
+				ImGui::Separator();
+				ImGui::Text("the available keyboards:");
 				ImGui::Columns(2, "keyboard");
 				ImGui::Separator();
 				ImGui::Text("Key"); ImGui::NextColumn();
@@ -505,10 +575,12 @@ void Scene::display_menu()
 				ImGui::Text("'g'"); ImGui::NextColumn(); ImGui::Text("turn the dog head down"); ImGui::NextColumn();
 				ImGui::Text("'t'"); ImGui::NextColumn(); ImGui::Text("turn the dog head up"); ImGui::NextColumn();
 				ImGui::Text("'m'"); ImGui::NextColumn(); ImGui::Text("show or hide menu"); ImGui::NextColumn();
+				ImGui::Text("'v'"); ImGui::NextColumn(); ImGui::Text("change view (between camera and dog)"); ImGui::NextColumn();
 				ImGui::Columns(1);
 			}
 
 			if (debug_mode)
+				ImGui::Separator();
 				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
 			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 0.6f, 0.6f));

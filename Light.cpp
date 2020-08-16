@@ -23,8 +23,8 @@ Light::Light(int id, GLfloat PosX, GLfloat PosY, GLfloat PosZ, string object, GL
 }
 
 void Light::draw() {
-	if (!glIsEnabled(id))
-		return;
+	//if (!glIsEnabled(id))
+	//	return;
 
 	glPushMatrix();
 	glTranslatef(position[0], position[1], position[2]);

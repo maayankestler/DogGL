@@ -115,12 +115,6 @@ void ObjectGL::draw() {
 				for (size_t v = 0; v < fv; v++) {
 					// access to vertex
 					tinyobj::index_t idx = this->shapes[s].mesh.indices[index_offset + v];
-					if (idx.vertex_index != -1) {
-						tinyobj::real_t vx = this->attrib.vertices[3 * idx.vertex_index + 0];
-						tinyobj::real_t vy = this->attrib.vertices[3 * idx.vertex_index + 1];
-						tinyobj::real_t vz = this->attrib.vertices[3 * idx.vertex_index + 2];
-						glVertex3f(vx, vy, vz);
-					}
 					if (idx.normal_index != -1) {
 						tinyobj::real_t nx = this->attrib.normals[3 * idx.normal_index + 0];
 						tinyobj::real_t ny = this->attrib.normals[3 * idx.normal_index + 1];
@@ -131,6 +125,12 @@ void ObjectGL::draw() {
 						tinyobj::real_t tx = this->attrib.texcoords[2 * idx.texcoord_index + 0];
 						tinyobj::real_t ty = this->attrib.texcoords[2 * idx.texcoord_index + 1];
 						glTexCoord2f(tx, ty);
+					}
+					if (idx.vertex_index != -1) {
+						tinyobj::real_t vx = this->attrib.vertices[3 * idx.vertex_index + 0];
+						tinyobj::real_t vy = this->attrib.vertices[3 * idx.vertex_index + 1];
+						tinyobj::real_t vz = this->attrib.vertices[3 * idx.vertex_index + 2];
+						glVertex3f(vx, vy, vz);
 					}
 				}
 			glEnd();

@@ -18,7 +18,7 @@ void Walls::draw() {
 	//glBindTexture(GL_TEXTURE_2D, this->texture_id);
 
 	GLfloat specular[] = { 1.0f, 1.0f, 1.0f };
-	GLfloat shininess = 128.0f;
+	GLfloat shininess = 64.0f;
 	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
 	glMaterialf(GL_FRONT, GL_SHININESS, shininess);
 	GLfloat wall_color[4] = { this->color[0], this->color[1], this->color[2], this->alpha };
