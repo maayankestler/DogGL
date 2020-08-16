@@ -32,7 +32,7 @@ ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ, G
 		base_dir += "/";
 	#endif
 
-	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, this->inputfile.c_str(), base_dir.c_str());
+	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, this->inputfile.c_str(), base_dir.c_str()); // load the .obj file
 
 	if (!warn.empty()) {
 		std::cout << "WARN: " << warn << std::endl;
@@ -51,23 +51,25 @@ ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ, G
 	this->materials = materials;
 
 	for (size_t s = 0; s < this->shapes.size(); s++) {
-		this->shapesTasks[this->shapes[s].name] = vector<function<void()>>(); // insert empty vector
+		this->shapesTasks[this->shapes[s].name] = vector<function<void()>>(); // insert empty tasks vectors
 	}
 
 	// create textures
-	this->textures[""] = 0;
+	this->textures[""] = 0; // if no given texture dont use texture
 	GLuint texture_id;
 	string texture_filename;
+	// for each material
 	for (size_t m = 0; m < materials.size(); m++) {
 		tinyobj::material_t* mp = &materials[m];
 		texture_filename = mp->diffuse_texname;
+		// find texture fie
 		if (this->textures.find(texture_filename) == this->textures.end()) {
 			if (FileExists(base_dir + mp->diffuse_texname)) {
 				// Append base dir.
 				texture_filename = base_dir + mp->diffuse_texname;
 			}
-			texture_id = create_texture(texture_filename);
-			this->textures.insert(make_pair(mp->diffuse_texname, texture_id));
+			texture_id = create_texture(texture_filename); // create the texture in opengl
+			this->textures.insert(make_pair(mp->diffuse_texname, texture_id)); // insetr the texture id to the textures map
 		}
 	}
 }
@@ -75,10 +77,10 @@ ObjectGL::ObjectGL(string inputfile, GLfloat PosX, GLfloat PosY, GLfloat PosZ, G
 void ObjectGL::draw() {
 	glPushMatrix();
 
-	glTranslatef(PosX, PosY, PosZ);
-	glRotatef(angle, this->upVector.x, this->upVector.y, this->upVector.z);
-	glScalef(scale, scale, scale);
-	// call all the tasks in the vector
+	glTranslatef(PosX, PosY, PosZ); // move the object to the wanted posistion
+	glRotatef(angle, this->upVector.x, this->upVector.y, this->upVector.z); // rotate the object
+	glScalef(scale, scale, scale); // scale the object
+	// call all the tasks in the GLOBAL tasks vector
 	for (function<void()> task : this->shapesTasks["GLOBAL"]) {
 		task();
 	}
@@ -87,6 +89,7 @@ void ObjectGL::draw() {
 	for (size_t s = 0; s < this->shapes.size(); s++) {
 		glPushMatrix();
 
+		// call all the shape's tasks
 		for (function<void()> task : this->shapesTasks[this->shapes[s].name]) {
 			task();
 		}
@@ -104,8 +107,7 @@ void ObjectGL::draw() {
 			int fv = this->shapes[s].mesh.num_face_vertices[f];
 
 			glBegin(GL_POLYGON);
-				//glMaterialfv(GL_FRONT, GL_AMBIENT, material->ambient);
-				//glMaterialfv(GL_FRONT, GL_DIFFUSE, material->diffuse);
+				// set metrial color settings
 				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, material->diffuse);
 				glMaterialfv(GL_FRONT, GL_SPECULAR, material->specular);
 				glMaterialfv(GL_FRONT, GL_EMISSION, material->emission);
@@ -113,19 +115,21 @@ void ObjectGL::draw() {
 
 				// Loop over vertices in the face.
 				for (size_t v = 0; v < fv; v++) {
-					// access to vertex
 					tinyobj::index_t idx = this->shapes[s].mesh.indices[index_offset + v];
+					// get normal
 					if (idx.normal_index != -1) {
 						tinyobj::real_t nx = this->attrib.normals[3 * idx.normal_index + 0];
 						tinyobj::real_t ny = this->attrib.normals[3 * idx.normal_index + 1];
 						tinyobj::real_t nz = this->attrib.normals[3 * idx.normal_index + 2];
 						glNormal3f(nx, ny, nz);
 					}
+					// get texture coordinates
 					if (idx.texcoord_index != -1) {
 						tinyobj::real_t tx = this->attrib.texcoords[2 * idx.texcoord_index + 0];
 						tinyobj::real_t ty = this->attrib.texcoords[2 * idx.texcoord_index + 1];
 						glTexCoord2f(tx, ty);
 					}
+					// get vertex
 					if (idx.vertex_index != -1) {
 						tinyobj::real_t vx = this->attrib.vertices[3 * idx.vertex_index + 0];
 						tinyobj::real_t vy = this->attrib.vertices[3 * idx.vertex_index + 1];
@@ -144,7 +148,7 @@ void ObjectGL::draw() {
 	glPopMatrix();
 }
 
-//Set the dog's position (center of torso position)
+// Set the object's position
 void ObjectGL::setPosition(GLfloat x, GLfloat y, GLfloat z) {
 	this->PosX = x;
 	this->PosY = y;
@@ -159,14 +163,14 @@ void ObjectGL::walk(GLfloat distance) {
 }
 
 void ObjectGL::addTask(function<void()> func, string shape) {
-	this->shapesTasks[shape].push_back(func);
+	this->shapesTasks[shape].push_back(func); // push the tasks to the vector
 }
 
 void ObjectGL::rotate(GLfloat angle) {
 	float rad_angle = (angle / 180) * glm::pi<float>(); // use radians
 	glm::mat4 rotationMat(1);
 	rotationMat = glm::rotate(rotationMat, rad_angle, this->upVector);
-	this->towardVector = glm::vec3(rotationMat * glm::vec4(this->towardVector, 1.0));
+	this->towardVector = glm::vec3(rotationMat * glm::vec4(this->towardVector, 1.0)); // rotate towardVector
 	this->angle += angle;
 }
 
@@ -182,7 +186,7 @@ GLuint ObjectGL::create_texture(string texture_filename) {
 	GLuint texture_id;
 	int w, h;
 	int comp;
-	unsigned char* image = stbi_load(texture_filename.c_str(), &w, &h, &comp, STBI_default);
+	unsigned char* image = stbi_load(texture_filename.c_str(), &w, &h, &comp, STBI_default); // load image
 	glGenTextures(1, &texture_id);
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

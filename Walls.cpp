@@ -14,9 +14,6 @@ void Walls::draw() {
 	glPushMatrix();
 	glNormal3d(0, 1, 0);
 
-	// bind Texture
-	//glBindTexture(GL_TEXTURE_2D, this->texture_id);
-
 	GLfloat specular[] = { 1.0f, 1.0f, 1.0f };
 	GLfloat shininess = 64.0f;
 	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
@@ -24,23 +21,21 @@ void Walls::draw() {
 	GLfloat wall_color[4] = { this->color[0], this->color[1], this->color[2], this->alpha };
 
 	float width, row_step, column_step;
-	row_step = height / (float)columns;
+	row_step = height / (float)columns; // calc rows height
 	glBegin(GL_QUADS);
 		glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, wall_color);
 		if (showSouth) {
-			width = glm::distance(glm::vec2(xMin, yMin), glm::vec2(xMax, yMin));
-			column_step = width / (float)columns;
+			width = glm::distance(glm::vec2(xMin, yMin), glm::vec2(xMax, yMin)); // calc width, the distance between (xMin, yMin) to (xMax, yMin)
+			column_step = width / (float)columns; // calc column width
+			// for each row
 			for (int row = 0; row < rows; row++)
 			{
+				// for each column
 				for (int column = 0; column < columns; column++)
 				{
-					//glTexCoord2f(0.0, 0.0);
 					glVertex3f(xMin + column * column_step, row * row_step, yMin );
-					//glTexCoord2f(1.0, 0.0);
 					glVertex3f(xMin + (column + 1) * column_step, row * row_step, yMin);
-					//glTexCoord2f(1.0, 1.0);
 					glVertex3f(xMin + (column + 1) * column_step, (row + 1) * row_step, yMin);
-					//glTexCoord2f(0.0, 1.0);
 					glVertex3f(xMin + column * column_step, (row + 1) * row_step, yMin);
 				}
 			}
@@ -52,13 +47,9 @@ void Walls::draw() {
 			{
 				for (int column = 0; column < columns; column++)
 				{
-					//glTexCoord2f(0.0, 0.0);
 					glVertex3f(xMin + column * column_step, row * row_step, yMax);
-					//glTexCoord2f(1.0, 0.0);
 					glVertex3f(xMin + (column + 1) * column_step, row * row_step, yMax);
-					//glTexCoord2f(1.0, 1.0);
 					glVertex3f(xMin + (column + 1) * column_step, (row + 1) * row_step, yMax);
-					//glTexCoord2f(0.0, 1.0);
 					glVertex3f(xMin + column * column_step, (row + 1) * row_step, yMax);
 				}
 			}

@@ -30,12 +30,11 @@ static float aspect = WINDOW_RATIO;
 // camera vars
 static GLfloat camera_position[3] = { 3, 10, 20 };
 static GLfloat camera_target[3] = { 0, 0, 0 };
-static GLfloat currentAngleOfRotation = 0.0;
 
 // light
 static float ambient_intensity = 0.2f;
-static int fe = 0; // 0 if flashlight is enabled and 1 if diabled
-static int le = 0; // 0 if lamp is enabled and 1 if diabled
+static int fe = 0; // 0 if flashlight is enabled and 1 if dsiabled
+static int le = 0; // 0 if lamp is enabled and 1 if dsiabled
 
 // others
 static bool debug_mode = false;
@@ -49,9 +48,9 @@ static bool dog_view = false;
 
 
 // imgui state
-static bool show_demo_window = false;
-static void HelpMarker(const char* desc);
+static void HelpMarker(const char* desc); // ad explenation to the option
 
+// this class represent the whole scene
 class Scene
 {
 private:	
@@ -67,17 +66,17 @@ private:
 	Light* lamp;
 	Floor* floor;
 	Walls* walls;
-	void drawCoordinateArrows();
-	static Scene* currentInstance;
-	void display_menu();
+	void drawCoordinateArrows(); // draw coordinate arrows fpr debuging
+	static Scene* currentInstance; // trick that helps to add opengl callbacks in class
+	void display_menu(); // display the menu (base on imgui)
 public:
 	Scene(int argc, char** argv);
 	void display(); // Function where the scene drawing occures	
 	void keyboard(unsigned char key, int x, int y); // Function for keyboard press
-	void keyboardUp(unsigned char key, int x, int y);
+	void keyboardUp(unsigned char key, int x, int y); // // Function for keyboard after press
 	void reshape(GLint w, GLint h); // Function to handle reshape of the screen
 	void SpecialInput(int key, int x, int y); // Function to handle arrows key
-	void SpecialInputUp(int key, int x, int y);
-	void timer(int v);
+	void SpecialInputUp(int key, int x, int y); // Function to handle arrows key after press
+	void timer(int v); // function that will be called every interval of time
 };
 

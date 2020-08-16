@@ -30,5 +30,5 @@ public:
 	~Light() = default;
 private:
 	int id; // must be GL_LIGHTi where 0 <= i < GL_MAX_LIGHTS
-	void fixDirection(); // rotate the light drawing to the right direction (from position to target)
+	void fixDirection(); // rotate the light drawing to the wanted direction (from position to target)
 };
