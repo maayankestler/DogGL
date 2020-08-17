@@ -418,13 +418,13 @@ void Scene::display_menu()
 		}
 		ImGui::ColorEdit3("floor color1", (float*)(&this->floor->color1)); HelpMarker("the floor's first color");
 		ImGui::ColorEdit3("floor color2", (float*)(&this->floor->color2)); HelpMarker("the floor's seconde color");
-		ImGui::ColorEdit3("walls color", (float*)(&this->walls->color)); HelpMarker("the walls seconde color");
+		ImGui::ColorEdit3("walls color", (float*)(&this->walls->color)); HelpMarker("the walls color");
 		ImGui::SliderFloat("walls alpha", &walls->alpha, 0.0f, 1.0f); HelpMarker("the walls transperncy");
 		if (debug_mode) {
-			ImGui::Checkbox("south wall", &walls->showSouth);
-			ImGui::Checkbox("north wall", &walls->showNorth);
-			ImGui::Checkbox("east wall", &walls->showEast);
-			ImGui::Checkbox("west wall", &walls->showWest);
+			ImGui::Checkbox("show south wall", &walls->showSouth);
+			ImGui::Checkbox("show north wall", &walls->showNorth);
+			ImGui::Checkbox("show east wall", &walls->showEast);
+			ImGui::Checkbox("show west wall", &walls->showWest);
 		}
 	}
 
@@ -463,7 +463,7 @@ void Scene::display_menu()
 	if (ImGui::CollapsingHeader("Lights"))
 	{
 		ImGui::RadioButton("enable flashlight", &fe, 0); ImGui::SameLine();
-		ImGui::RadioButton("disable flashlight", &fe, 1);
+		ImGui::RadioButton("disable flashlight", &fe, 1); HelpMarker("enable to add the flashlight's light to the scene");
 		if (fe == 0) {
 			flashlight->enable();
 		}
@@ -472,7 +472,7 @@ void Scene::display_menu()
 			flashlight->disable();
 		}
 		ImGui::RadioButton("enable lamp", &le, 0); ImGui::SameLine();
-		ImGui::RadioButton("disable lamp", &le, 1);
+		ImGui::RadioButton("disable lamp", &le, 1); HelpMarker("enable to add the lamp's light to the scene");
 		if (le == 0) {
 			lamp->enable();
 		}
@@ -481,7 +481,7 @@ void Scene::display_menu()
 			lamp->disable();
 		}
 		ImGui::SliderFloat("adjust ambient light", &ambient_intensity, 0.0f, 1.0f);                 HelpMarker("control the intensity of the global ambient");
-		ImGui::ColorEdit3("lamp light color", (float*)(&this->lamp->color));            HelpMarker("chose the color of the lamp's light");
+		ImGui::ColorEdit3("lamp light color", (float*)(&this->lamp->color));						HelpMarker("chose the color of the lamp's light");
 		ImGui::ColorEdit3("flashlight light color", (float*)(&this->flashlight->color));            HelpMarker("chose the color of the flashlight's light");
 		ImGui::SliderFloat("flashlight position x", &this->flashlight->position[0], -10.0f, 10.0f); HelpMarker("the x coordinate of the flashlight position");
 		ImGui::SliderFloat("flashlight position y", &this->flashlight->position[1], -10.0f, 10.0f); HelpMarker("the y coordinate of the flashlight position");
@@ -529,7 +529,7 @@ void Scene::display_menu()
 				}
 				ImGui::EndCombo();
 			}
-			HelpMarker("chose the flashlight form");
+			HelpMarker("chose the flashlight drawing object");
 
 			ImGui::SliderFloat("lamp scale", &this->lamp->object->scale, 0.0f, 3.0f);
 			ImGui::SliderFloat("lamp angle", &this->lamp->object->angle, 0.0f, 360.0f);
