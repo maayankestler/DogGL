@@ -137,12 +137,13 @@ glm::vec3 Dog::getViewVector() {
 	glm::vec3 view_vector = towardVector;
 
 	float rad_angle = (organsAngles[DOG_HEAD][true] / 180) * glm::pi<float>(); // use radians
-	glm::mat4 rotationMat(1);
-	rotationMat = glm::rotate(rotationMat, rad_angle, this->sideVector);
-	view_vector = glm::vec3(rotationMat * glm::vec4(view_vector, 1.0)); // rotate the eyes vertical
+	glm::mat4 rotationMatVert(1);
+	rotationMatVert = glm::rotate(rotationMatVert, rad_angle, this->sideVector);
+	view_vector = glm::vec3(rotationMatVert * glm::vec4(view_vector, 1.0)); // rotate the eyes vertical
 
 	rad_angle = (organsAngles[DOG_HEAD][false] / 180) * glm::pi<float>();
-	rotationMat = glm::rotate(rotationMat, rad_angle, this->upVector);
-	view_vector = glm::vec3(rotationMat * glm::vec4(view_vector, 1.0)); // rotate the eyes vertical hotizontal
-	return view_vector;
+	glm::mat4 rotationMatHor(1);
+	rotationMatHor = glm::rotate(rotationMatHor, rad_angle, this->upVector);
+	view_vector = glm::vec3(rotationMatHor * glm::vec4(view_vector, 1.0)); // rotate the eyes vertical hotizontal
+	return glm::normalize(view_vector);
 }
