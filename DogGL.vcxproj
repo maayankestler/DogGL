@@ -169,6 +169,7 @@
     <ClInclude Include="ObjectGL.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="Walls.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dog.cpp" />
@@ -183,6 +184,7 @@
     <ClCompile Include="ObjectGL.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Walls.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

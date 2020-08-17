@@ -21,7 +21,7 @@ public:
 	ObjectGL* object = NULL; // object to draw
 
 	Light(int id, GLfloat PosX = 0, GLfloat PosY = 10, GLfloat PosZ = 0, string object = "",
-		  GLfloat cutoff = 90.0f, GLfloat exponent = 0.0f,
+		  GLfloat scale = 1.0f, GLfloat cutoff = 90.0f, GLfloat exponent = 0.0f,
 		  GLfloat TargetX = 0, GLfloat TargetY = 0, GLfloat TargetZ = 0);
 	void draw(); // draw the light in the scene
 	void addlight(); // add the lighting of the light
@@ -30,5 +30,5 @@ public:
 	~Light() = default;
 private:
 	int id; // must be GL_LIGHTi where 0 <= i < GL_MAX_LIGHTS
-	void fixDirection(); // rotate the light drawing to the right direction (from position to target)
+	void fixDirection(); // rotate the light drawing to the wanted direction (from position to target)
 };
