@@ -1,5 +1,6 @@
 # DogGL
 #### Dog room with glut and opengl.
+![screenshoot](screenshot.PNG)
 
 This program use c++ and opengl to draw a room with a dog.<br>
 Use the menu (prees m to show/hide) to control the scene and open the help category for more information.
